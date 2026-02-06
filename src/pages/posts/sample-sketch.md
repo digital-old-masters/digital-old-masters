@@ -4,7 +4,7 @@ title: "Kofu Sketch #001: Entropy of the Station"
 artDate: "2026-02-06"
 location: "Kofu Station, Yamanashi"
 description: "甲府駅における人の流れのエントロピーを観測し、線の強弱で表現した習作。"
-image: "/digital-old-masters/images/kofu-001.jpg"
+image: "images/kofu-001.jpg"
 ---
 
 # Kofu Sketch #001
