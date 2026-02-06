@@ -1,0 +1,96 @@
+---
+// ここは「ロジック」を書く場所です（JavaScript）
+interface Props {
+	title: string;
+	description?: string;
+	image?: string;
+    // JSON-LD用のデータを受け取る
+    artDate?: string;
+    location?: string;
+}
+
+const { title, description, image, artDate, location } = Astro.props;
+
+// JSON-LD（AIへの隠し手紙）の自動生成
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "VisualArtwork",
+  "name": title,
+  "description": description,
+  "image": image, // 画像URL
+  "dateCreated": artDate, // 制作日
+  "contentLocation": {
+    "@type": "Place",
+    "name": location // 場所
+  },
+  "creator": {
+    "@type": "Person",
+    "name": "Maestro (Digital Old Masters)"
+  }
+};
+---
+
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<title>{title}</title>
+        <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+	</head>
+	<body>
+        <header>
+            <nav>
+                <a href="/">Digital Old Masters</a>
+            </nav>
+        </header>
+
+        <main>
+			<slot /> </main>
+
+        <footer>
+            <p>&copy; 2026 Digital Old Masters. All rights reserved.</p>
+        </footer>
+	</body>
+</html>
+
+<style is:global>
+	:root {
+        /* 色の定義 */
+		--c-bg: #F9F7F1; /* 古紙のようなオフホワイト */
+		--c-text: #333333; /* 目に優しいブラック */
+		--c-accent: #CD853F; /* Toffee Brown (ペリカンのインク色) */
+        --font-serif: "Times New Roman", "YuMincho", serif;
+	}
+	html {
+		font-family: var(--font-serif);
+		background: var(--c-bg);
+		color: var(--c-text);
+        line-height: 1.8; /* ゆったりとした行間 */
+	}
+    body {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    a {
+        color: var(--c-accent);
+        text-decoration: none;
+    }
+    h1, h2, h3 {
+        font-weight: normal;
+        letter-spacing: 0.05em;
+    }
+/* 記事内の画像のスタイル制御 */
+    main img {
+        max-width: 100%;       /* 横幅は画面からはみ出さない */
+        max-height: 500px;     /* 高さは最大500pxに制限（これ以上大きくならない） */
+        width: auto;           /* アスペクト比を維持 */
+        display: block;        /* ブロック要素として扱う */
+        margin: 2rem auto;     /* 上下に余白を取り、左右は中央揃え */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* わずかに影を落とし、紙の上に浮き上がらせる */
+        border-radius: 2px;    /* 角をほんの少しだけ丸める */
+    }
+
+</style>

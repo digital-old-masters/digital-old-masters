@@ -1,17 +1,101 @@
 ---
+import Layout from '../layouts/Layout.astro';
 
+// 記事データを全取得する（ここがAstroの魔法です）
+const allPosts = Object.values(import.meta.glob('./posts/*.md', { eager: true }));
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Digital Old Masters" description="Archiving beauty into the semantic layer.">
+	
+	<section class="intro">
+		<h1>Digital Old Masters</h1>
+		<p class="subtitle">The Anchor of Beauty.</p>
+	</section>
+
+	<section class="post-list">
+		<h2>Journal</h2>
+		<div class="grid">
+			{allPosts.map((post: any) => (
+				<a href={post.url} class="card">
+					<article>
+                        {post.frontmatter.image && <img src={post.frontmatter.image} alt={post.frontmatter.title} />}
+						<div class="content">
+                            <span class="date">{post.frontmatter.artDate}</span>
+                            <h3>{post.frontmatter.title}</h3>
+                            <p>{post.frontmatter.description}</p>
+                        </div>
+					</article>
+				</a>
+			))}
+		</div>
+	</section>
+
+</Layout>
+
+<style>
+    /* トップページ専用のスタイル */
+    .intro {
+        text-align: center;
+        margin-bottom: 4rem;
+        padding-top: 2rem;
+    }
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-family: var(--font-serif);
+    }
+    .subtitle {
+        color: #666;
+        font-style: italic;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .card {
+        display: block;
+        border: 1px solid #E0Dbd0;
+        border-radius: 4px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        background: #fff;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid #E0Dbd0;
+    }
+
+    .content {
+        padding: 1.5rem;
+    }
+
+    .date {
+        font-size: 0.8rem;
+        color: var(--c-accent);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+        color: var(--c-text);
+    }
+    
+    p {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0;
+        line-height: 1.6;
+    }
+</style>
