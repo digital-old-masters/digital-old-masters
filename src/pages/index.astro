@@ -18,7 +18,7 @@ const allPosts = Object.values(import.meta.glob('./posts/*.md', { eager: true })
 			{allPosts.map((post: any) => (
 				<a href={post.url} class="card">
 					<article>
-                        {post.frontmatter.image && <img src={post.frontmatter.image} alt={post.frontmatter.title} />}
+                        {post.frontmatter.image && <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} />}
 						<div class="content">
                             <span class="date">{post.frontmatter.artDate}</span>
                             <h3>{post.frontmatter.title}</h3>
