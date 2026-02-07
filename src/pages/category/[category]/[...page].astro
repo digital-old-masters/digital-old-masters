@@ -1,5 +1,5 @@
 ---
-import Layout from '../../../layouts/Layout.astro'; /* 階層が深くなったのでパス修正 */
+import Layout from '../../../layouts/Layout.astro';
 import type { GetStaticPaths, Page } from 'astro';
 
 interface Props {
@@ -11,7 +11,6 @@ export const getStaticPaths = (async ({ paginate }) => {
   const allPosts = Object.values(import.meta.glob('../../posts/*.{md,mdx}', { eager: true }));
   const uniqueCategories = [...new Set(allPosts.map((post: any) => post.frontmatter.category).filter(Boolean))];
   
-  // flatMapを使って、各カテゴリごとにページネーションを生成して結合する
   return uniqueCategories.flatMap((category) => {
     const filteredPosts = allPosts.filter((post: any) => 
       post.frontmatter.category === category
@@ -27,18 +26,22 @@ export const getStaticPaths = (async ({ paginate }) => {
 
 const { page, categoryName } = Astro.props;
 const { category } = Astro.params;
+/* ベースURLを取得（末尾のスラッシュは除去） */
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
+/* ページネーション用URL生成関数 */
 const getPageUrl = (url: string | undefined) => {
     if (!url) return undefined;
     if (url.startsWith(baseUrl)) return url;
     return baseUrl + url;
 };
 
+/* 【修正】パンくずリスト定義時に、明示的に baseUrl を結合する */
+/* これにより Layout.astro 側での補正ミスを防ぎ、確実に正しいリンクを作ります */
 const breadcrumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'Archives', href: '/archives' },
-    { label: categoryName, href: `/category/${category}` }
+    { label: 'Home', href: `${baseUrl}/` },
+    { label: 'Archives', href: `${baseUrl}/archives` },
+    { label: categoryName, href: `${baseUrl}/category/${category}` }
 ];
 ---
 
@@ -77,7 +80,7 @@ const breadcrumbs = [
         </div>
     </section>
 
-    {/* ページネーションUIの追加 */}
+    {/* ページネーションUI */}
     {page.lastPage > 1 && (
         <nav class="pagination">
             {page.url.prev ? (
