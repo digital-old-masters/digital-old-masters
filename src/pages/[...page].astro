@@ -41,30 +41,32 @@ const isFirstPage = page.currentPage === 1;
 		<h2>{isFirstPage ? 'Journal' : `Journal (Page ${page.currentPage})`}</h2>
 		<div class="grid">
 			{page.data.map((post: any) => (
-				<a href={post.url} class="card">
-					<article>
-                        <div class="card-image">
-                            {post.frontmatter.image && 
-                            <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
-                            }
+                /* 変更点1: 外側を <a> ではなく <article> (ただの箱) にする */
+				<article class="card">
+                    <div class="card-image">
+                        {post.frontmatter.image && 
+                        <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
+                        }
+                    </div>
+					<div class="content">
+                        <div class="meta">
+                            <span class="date">{post.frontmatter.artDate}</span>
+                            {post.frontmatter.category && <span class="category-label">{post.frontmatter.category}</span>}
                         </div>
-						<div class="content">
-                            <div class="meta">
-                                <span class="date">{post.frontmatter.artDate}</span>
-                                {post.frontmatter.category && <span class="category-label">{post.frontmatter.category}</span>}
-                            </div>
-                            <h3>{post.frontmatter.title}</h3>
-                            
-                            <div class="tags">
-                                {post.frontmatter.tags && post.frontmatter.tags.map((tag: string) => (
-            <object>
-                <a href={`${baseUrl}/tags/${tag}`} class="tag">#{tag}</a>
-            </object>
-        ))}
-                            </div>
+                        
+                        <h3>
+                            <a href={post.url} class="main-link">
+                                {post.frontmatter.title}
+                            </a>
+                        </h3>
+                        
+                        <div class="tags">
+                            {post.frontmatter.tags && post.frontmatter.tags.map((tag: string) => (
+                                <a href={`${baseUrl}/tags/${tag}`} class="tag">#{tag}</a>
+                            ))}
                         </div>
-					</article>
-				</a>
+                    </div>
+				</article>
 			))}
 		</div>
 	</section>

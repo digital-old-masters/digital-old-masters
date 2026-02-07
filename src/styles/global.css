@@ -1,5 +1,6 @@
 /* src/styles/global.css */
 
+/* --- Base Styles --- */
 section { margin-bottom: 5rem; }
 .hero { text-align: center; padding: 4rem 0 3rem; }
 h1 { font-size: 2.8rem; margin-bottom: 0.5rem; letter-spacing: 0.08em; }
@@ -24,51 +25,122 @@ h2 {
     font-style: italic; 
 }
 
-/* グリッドレイアウト */
+/* --- Grid Layout --- */
 .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* auto-fillをやめて固定3列に */
+    /* スマホは1列、PCは幅に合わせて自動詰め込み（最小260px） */
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 2.5rem;
 }
 
-/* カードスタイル */
+/* --- Card Component (Layered Link Structure) --- */
 .card { 
     display: block; 
+    /* 【修正】border-radiusによる切り抜きを確実にする */
     border-radius: 4px; 
-    overflow: hidden; 
+    overflow: hidden; /* これが効いているか再確認 */
+    
     background: #fff; 
     transition: all 0.3s ease; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
-    border: 1px solid transparent;
+    
+    /* 【修正】透明なボーダーが隙間を生む可能性があるので、一旦削除または0にする */
+    /* border: 1px solid transparent;  <-- これを削除またはコメントアウト */
+    border: none;
+    position: relative;
 }
+
 .card:hover { 
     transform: translateY(-3px); 
     box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
     border-color: #f0eadd; 
 }
 
-.card-image { height: 200px; overflow: hidden; background: #f4f4f4; }
-.card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+.card-image { 
+    height: 200px; 
+    overflow: hidden; 
+    background: #fff;
+    position: relative;
+    /* 【追加】コンテナ自体の隙間をゼロにする */
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.card img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+    transition: transform 0.5s;
+    
+    /* 【修正】上端に強制的に合わせる */
+    display: block;
+    vertical-align: top; /* bottom から top に変更 */
+    /* 【追加】念には念を入れてマージンもゼロにする */
+    margin: 0;
+    padding: 0;
+}
+
 .card:hover img { transform: scale(1.03); }
 
-.content { padding: 1.5rem; }
-.meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; }
+/* 【重要】ここが欠落していました。余白の復活 */
+.content { 
+    padding: 1.5rem; 
+}
+
+/* 【重要】日付とカテゴリを左右に分ける */
+.meta { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 0.5rem; 
+    font-size: 0.8rem; 
+}
 .date { color: #999; }
 .category-label { color: #CD853F; text-transform: uppercase; letter-spacing: 0.05em; }
-.card h3 { margin: 0.5rem 0 1rem 0; font-size: 1.2rem; color: #333; line-height: 1.4; }
 
-.tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.tag { font-size: 0.75rem; color: #aaa; transition: color 0.2s; z-index: 2; position: relative;}
+/* Main Link (透明なシート) */
+.card h3 { margin: 0.5rem 0 1rem 0; font-size: 1.2rem; line-height: 1.4; }
+
+.main-link {
+    color: #333;
+    text-decoration: none;
+}
+/* 魔法: カード全体を覆うリンクエリア */
+.main-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; 
+}
+
+/* Concept Tags (個別クリック可能) */
+.tags { 
+    display: flex; 
+    gap: 0.5rem; 
+    flex-wrap: wrap; 
+    margin-top: 1rem; 
+}
+.tag { 
+    font-size: 0.75rem; 
+    color: #aaa; 
+    transition: color 0.2s; 
+    position: relative; 
+    z-index: 2; /* 透明シートより上に浮かせる */
+}
 .tag:hover { color: #CD853F; }
 
-/* ページネーション */
+/* --- Pagination --- */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-top: 4rem; font-family: serif; }
 .pagination a, .pagination .disabled { padding: 0.5rem 1rem; border: 1px solid #E0Dbd0; border-radius: 2px; transition: all 0.2s; font-size: 0.9rem; }
 .pagination a:hover { border-color: #CD853F; color: #CD853F; }
 .pagination .disabled { opacity: 0.4; cursor: default; }
 .current { font-size: 0.9rem; color: #999; font-style: italic; }
 
-/* スマホ対応 */
+/* --- Mobile --- */
 @media (max-width: 768px) {
     .grid { grid-template-columns: 1fr; }
 }
