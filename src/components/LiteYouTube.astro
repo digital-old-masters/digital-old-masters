@@ -6,32 +6,33 @@ interface Props {
 const { videoId, title } = Astro.props;
 ---
 
-<div class="video-container" data-id={videoId}>
-    <div class="play-button" aria-label="Play Video">
-        <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+<div class="video-wrapper">
+    <div class="video-container" data-id={videoId}>
+        <div class="play-button" aria-label="Play Video">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <img 
+            src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`} 
+            alt={title} 
+            loading="lazy"
+        />
+        <iframe 
+            class="youtube-iframe"
+            title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen
+        ></iframe>
     </div>
-    <img 
-        src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-        alt={title} 
-        loading="lazy"
-    />
-    <iframe 
-        class="youtube-iframe"
-        title={title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen
-    ></iframe>
 </div>
 
 <script>
-    // クリックしたらiframeのsrcを入れて読み込む（軽量化ロジック）
     const containers = document.querySelectorAll('.video-container');
     containers.forEach(c => {
         c.addEventListener('click', () => {
             const id = c.getAttribute('data-id');
             const iframe = c.querySelector('iframe');
             if (iframe && !iframe.src) {
-                iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+                iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
                 c.classList.add('playing');
             }
         });
@@ -39,59 +40,73 @@ const { videoId, title } = Astro.props;
 </script>
 
 <style>
+    /* ラッパーで余白を制御 */
+    .video-wrapper {
+        max-width: 100%;
+        margin: 2rem auto;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        overflow: hidden; /* 角丸からはみ出さないように */
+    }
+
+    /* 構造的解決策: 2. 枠の厳格化 */
     .video-container {
         position: relative;
         width: 100%;
-        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        /* 現代的なアスペクト比指定。16:9の枠を強制する */
+        aspect-ratio: 16 / 9; 
         background: #000;
         cursor: pointer;
-        overflow: hidden;
-        border-radius: 2px;
+        /* 鉄の掟: 中身が何であれ、この枠からはみ出させない */
+        overflow: hidden; 
     }
+
+    /* 構造的解決策: 3. 配置の最適化 */
     img {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
+        /* 枠に合わせて隙間なく埋める。ソースが16:9なら完璧にフィットする */
         object-fit: cover;
-        opacity: 0.8;
-        transform: scale(1.35); 
-        transform-origin: center center;
-        transition: opacity 0.3s;
+        opacity: 0.85; /* 少し明るくして上品に */
+        transition: opacity 0.3s, transform 0.3s;
     }
-    .video-container:hover img { opacity: 0.6; }
+    
+    .video-container:hover img { 
+        opacity: 0.7;
+        transform: scale(1.02); /* ホバー時にほんの少しだけズームして奥行きを出す（枠内での演出） */
+    }
     
     .play-button {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        width: 64px;
+        height: 64px;
+        background: rgba(0,0,0,0.6); /* 背景を追加して視認性アップ */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         color: #fff;
         z-index: 2;
-        transition: transform 0.2s;
+        transition: all 0.2s ease-out;
+        backdrop-filter: blur(2px); /* すりガラス効果 */
     }
-    .video-container:hover .play-button { transform: translate(-50%, -50%) scale(1.1); }
+    .play-button svg { width: 32px; height: 32px; fill: currentColor; }
+    .video-container:hover .play-button { 
+        background: rgba(205, 133, 63, 0.9); /* アクセントカラーに変更 */
+        transform: translate(-50%, -50%) scale(1.1); 
+    }
 
     .youtube-iframe {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border: none;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.5s;
-        z-index: 3;
+        top: 0; left: 0; width: 100%; height: 100%;
+        border: none; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 3;
     }
-    
-    /* 再生中はiframeを表示 */
-    .video-container.playing .youtube-iframe {
-        opacity: 1;
-        pointer-events: auto;
-    }
-    .video-container.playing img, .video-container.playing .play-button {
-        display: none;
-    }
+    .video-container.playing .youtube-iframe { opacity: 1; pointer-events: auto; }
+    .video-container.playing img, .video-container.playing .play-button { display: none; }
 </style>
