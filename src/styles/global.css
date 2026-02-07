@@ -213,11 +213,13 @@ h2 {
 .footer-search-wrapper {
     max-width: 400px;
     
-    /* 【修正】100% → 90% に変更 */
-    /* これにより、スマホ画面でも左右に必ず余白が生まれます */
+    /* スマホ用の美しい幅設定は維持 */
     width: 90%; 
     
-    margin: 0 auto 1.5rem auto; 
+    /* 【修正】下の余白(1.5rem)を削除し、純粋な中央揃え(0 auto)のみにする */
+    /* これにより、親要素の gap: 1.5rem だけが適用され、距離がぐっと縮まります */
+    margin: 0 auto; 
+    
     text-align: left;
 }
 
