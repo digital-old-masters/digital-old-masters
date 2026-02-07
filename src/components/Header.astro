@@ -1,21 +1,26 @@
 ---
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 const navItems = [
-  { href: '/digital-old-masters/', label: 'Home' },
-  { href: '#index', label: 'Index' }, // ページ下部の検索・タグへ飛ぶ
+  { href: '/', label: 'Home' },
+  // カテゴリリンクの例（必要に応じて増やしてください）
+  { href: '/category/sketches', label: 'Sketches' },
+  { href: '/category/essays', label: 'Essays' },
+  // アーカイブ（包摂案）
+  { href: '/archives', label: 'Archives' },
+  // 検索（アンカーリンク）
+  { href: '#search', label: '🔍', isIcon: true },
 ];
 ---
-
 <header id="main-header">
   <div class="container">
     <a href={import.meta.env.BASE_URL} class="logo">Digital Old Masters</a>
     
     <nav class="desktop-nav">
       {navItems.map(item => (
-        <a href={item.href}>{item.label}</a>
+        <a href={item.href.startsWith('#') ? item.href : baseUrl + item.href} class={item.isIcon ? 'icon-link' : ''}>
+          {item.label}
+        </a>
       ))}
-      <a href="#search" class="search-icon" aria-label="Search">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      </a>
     </nav>
 
     <button id="menu-toggle" aria-label="Menu">
@@ -26,97 +31,44 @@ const navItems = [
 
   <nav id="mobile-menu">
     {navItems.map(item => (
-      <a href={item.href}>{item.label}</a>
+      <a href={item.href.startsWith('#') ? item.href : baseUrl + item.href}>{item.label}</a>
     ))}
   </nav>
 </header>
 
 <script>
-  // ハンバーガーメニューの開閉ロジック
   const toggle = document.getElementById('menu-toggle');
   const menu = document.getElementById('mobile-menu');
-  
   toggle?.addEventListener('click', () => {
     menu?.classList.toggle('active');
     toggle.classList.toggle('active');
   });
+  // メニューリンクをクリックしたら閉じる
+  menu?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        menu.classList.remove('active');
+        toggle.classList.remove('active');
+      });
+  });
 </script>
 
 <style>
-  header {
-    padding: 1.5rem 0;
-    position: sticky;
-    top: 0;
-    background: var(--c-bg); /* 背景色と同じにして溶け込ませる */
-    z-index: 100;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.3s;
-  }
-  /* スクロールしたら境界線を出す */
-  :global(body.scrolled) header {
-    border-bottom: 1px solid #E0Dbd0;
-  }
-
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .logo {
-    font-family: var(--font-serif);
-    font-size: 1.2rem;
-    letter-spacing: 0.05em;
-    color: var(--c-text);
-    text-decoration: none;
-    font-weight: bold;
-  }
-
-  .desktop-nav {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-  }
-  .desktop-nav a {
-    color: #666;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.2s;
-  }
-  .desktop-nav a:hover {
-    color: var(--c-accent);
-  }
-
-  /* Mobile Menu Styles */
-  #menu-toggle {
-    display: none; /* PCでは隠す */
-    background: none;
-    border: none;
-    cursor: pointer;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .bar {
-    width: 24px;
-    height: 2px;
-    background-color: var(--c-text);
-    transition: 0.3s;
-  }
-  #mobile-menu {
-    display: none;
-    flex-direction: column;
-    padding: 1rem 2rem;
-    border-top: 1px solid #E0Dbd0;
-  }
-  #mobile-menu.active {
-    display: flex;
-  }
-
-  @media (max-width: 600px) {
-    .desktop-nav { display: none; }
-    #menu-toggle { display: flex; }
-  }
+  /* ...以前のスタイルと同じ... */
+  header { padding: 1.2rem 0; position: sticky; top: 0; background: var(--c-bg); z-index: 100; border-bottom: 1px solid transparent; transition: all 0.3s; }
+  :global(body.scrolled) header { border-bottom-color: #E0Dbd0; background: rgba(249, 247, 241, 0.95); backdrop-filter: blur(5px); }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: var(--font-serif); font-size: 1.3rem; letter-spacing: 0.05em; color: var(--c-text); font-weight: bold; }
+  .desktop-nav { display: flex; gap: 1.8rem; align-items: center; }
+  .desktop-nav a { color: #555; font-size: 0.95rem; letter-spacing: 0.03em; position: relative; }
+  .desktop-nav a:not(.icon-link)::after { content: ''; position: absolute; width: 0; height: 1px; bottom: -4px; left: 0; background-color: var(--c-accent); transition: width 0.3s; }
+  .desktop-nav a:not(.icon-link):hover::after { width: 100%; }
+  .desktop-nav a.icon-link { font-size: 1.2rem; }
+  #menu-toggle { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 5px; }
+  .bar { width: 22px; height: 2px; background-color: var(--c-text); transition: 0.3s; }
+  #menu-toggle.active .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  #menu-toggle.active .bar:nth-child(2) { transform: translateY(-7px) rotate(-45deg); }
+  #mobile-menu { display: none; flex-direction: column; padding: 1.5rem; border-top: 1px solid #E0Dbd0; background: var(--c-bg); position: absolute; top: 100%; left: 0; width: 100%; box-sizing: border-box; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+  #mobile-menu.active { display: flex; }
+  #mobile-menu a { padding: 0.8rem 0; border-bottom: 1px solid #eee; color: #333; font-size: 1.1rem; text-align: center; }
+  @media (max-width: 768px) { .desktop-nav { display: none; } #menu-toggle { display: flex; } }
 </style>
