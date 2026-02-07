@@ -221,12 +221,17 @@ h2 {
 }
 
 /* 1. Search Wrapper */
+/* src/styles/global.css の .footer-search-wrapper 部分を修正 */
+
 .footer-search-wrapper {
     max-width: 400px;
     width: 100%;
-    /* margin-bottom は gap に任せて削除 */
-    margin: 0 auto; 
-    text-align: left; /* 入力文字だけは左揃え */
+    
+    /* 【修正】下に3remの余白を追加し、SNSとの距離を広げる */
+    /* gap: 3rem と合算され、合計 6rem 分の広いスペースが生まれます */
+    margin: 0 auto 3rem auto;
+    
+    text-align: left;
 }
 
 /* 2. Socials */
