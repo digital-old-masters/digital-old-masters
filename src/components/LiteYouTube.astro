@@ -56,6 +56,8 @@ const { videoId, title } = Astro.props;
         height: 100%;
         object-fit: cover;
         opacity: 0.8;
+        transform: scale(1.35); 
+        transform-origin: center center;
         transition: opacity 0.3s;
     }
     .video-container:hover img { opacity: 0.6; }
