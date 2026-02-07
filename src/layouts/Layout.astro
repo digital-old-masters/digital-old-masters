@@ -1,4 +1,5 @@
 ---
+/* src/layouts/Layout.astro - Fixed Breadcrumbs Logic */
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
@@ -32,7 +33,8 @@ if (frontmatter && frontmatter.tags) {
         .slice(0, 3); 
 }
 
-/* --- JSON-LD生成ロジック --- */
+/* --- JSON-LD生成ロジック (SEO用) --- */
+/* 注: ここでは絶対パスが必要ですが、HTML表示には使いません */
 let breadcrumbList = breadcrumbs ? breadcrumbs.map((crumb, index) => ({
     "@type": "ListItem",
     "position": index + 1,
@@ -40,6 +42,7 @@ let breadcrumbList = breadcrumbs ? breadcrumbs.map((crumb, index) => ({
     "item": new URL(crumb.href.replace(/^\//, ''), siteUrl).toString()
 })) : [];
 
+// 自動補完ロジック
 if (frontmatter && !breadcrumbs) {
     breadcrumbList = [
         {
@@ -81,6 +84,18 @@ const schemaData = {
     }
   ]
 };
+
+/* 【追加】パンくずリスト用の安全なURL生成関数 */
+/* hrefが '/' で始まる場合、ベースパスを付与します */
+const getBreadcrumbUrl = (url: string) => {
+    // httpで始まる外部リンクや、既にベースパスが含まれている場合はそのまま
+    if (url.startsWith('http') || url.startsWith(baseUrl)) return url;
+    
+    // スラッシュの重複を防いで結合
+    const cleanBase = baseUrl.replace(/\/$/, '');
+    const cleanUrl = url.replace(/^\//, '');
+    return `${cleanBase}/${cleanUrl}`;
+};
 ---
 
 <!doctype html>
@@ -100,7 +115,19 @@ const schemaData = {
             {(breadcrumbs || (frontmatter && breadcrumbList.length > 0)) && (
                 <nav class="breadcrumbs" aria-label="Breadcrumb">
                     <ol>
-                        {breadcrumbList.map((crumb, index) => (
+                        {/* 【修正】 propsのbreadcrumbsがある場合は、それを優先して表示し、関数を通す */}
+                        {breadcrumbs ? breadcrumbs.map((crumb, index) => (
+                            <li>
+                                {index === breadcrumbs.length - 1 ? (
+                                    <span aria-current="page">{crumb.label}</span>
+                                ) : (
+                                    /* ここで getBreadcrumbUrl を使用 */
+                                    <a href={getBreadcrumbUrl(crumb.href)}>{crumb.label}</a>
+                                )}
+                            </li>
+                        )) : 
+                        /* 自動生成（frontmatter）の場合のフォールバック */
+                        breadcrumbList.map((crumb, index) => (
                             <li>
                                 {index === breadcrumbList.length - 1 ? (
                                     <span aria-current="page">{crumb.name}</span>
