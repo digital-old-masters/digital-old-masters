@@ -57,8 +57,10 @@ const isFirstPage = page.currentPage === 1;
                             
                             <div class="tags">
                                 {post.frontmatter.tags && post.frontmatter.tags.map((tag: string) => (
-                                    <span class="tag">#{tag}</span>
-                                ))}
+            <object>
+                <a href={`${baseUrl}/tags/${tag}`} class="tag">#{tag}</a>
+            </object>
+        ))}
                             </div>
                         </div>
 					</article>
