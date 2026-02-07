@@ -5,6 +5,7 @@ artDate: "2026-02-06"
 location: "Japan"
 description: "油彩における人の流れのエントロピーを観測し、線の強弱で表現した習作。"
 image: "/images/aoiro-001.jpg"
+tags: ["aoiro", "Pencil", "Study"]
 ---
 
 # Kofu Sketch #001

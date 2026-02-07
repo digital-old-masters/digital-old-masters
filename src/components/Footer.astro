@@ -1,0 +1,62 @@
+---
+const today = new Date();
+---
+
+<footer id="index">
+  <div class="search-section" id="search">
+    <h3>Index & Search</h3>
+    <div id="search-box"></div> </div>
+
+  <div class="copyright">
+    &copy; {today.getFullYear()} Digital Old Masters. <br>
+    Archiving beauty into the semantic layer.
+  </div>
+</footer>
+
+<link href={import.meta.env.BASE_URL + "pagefind/pagefind-ui.css"} rel="stylesheet">
+<script src={import.meta.env.BASE_URL + "pagefind/pagefind-ui.js"} is:inline></script>
+<script is:inline>
+  window.addEventListener('DOMContentLoaded', () => {
+    new PagefindUI({ 
+        element: "#search-box", 
+        showSubResults: true,
+        showImages: false 
+    });
+  });
+</script>
+
+<style>
+  footer {
+    margin-top: 4rem;
+    padding: 4rem 2rem;
+    border-top: 1px solid #E0Dbd0;
+    text-align: center;
+  }
+  .search-section {
+    max-width: 500px;
+    margin: 0 auto 3rem auto;
+    text-align: left;
+  }
+  .search-section h3 {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    font-weight: normal;
+  }
+  .copyright {
+    font-size: 0.8rem;
+    color: #999;
+    line-height: 1.6;
+  }
+  
+  /* PagefindのUIをサイトの美学に合わせる上書きCSS */
+  :global(.pagefind-ui__search-input) {
+    background: transparent !important;
+    border: 1px solid #E0Dbd0 !important;
+    font-family: var(--font-serif) !important;
+    border-radius: 2px !important;
+  }
+  :global(.pagefind-ui__result) {
+    border-color: #E0Dbd0 !important;
+  }
+</style>

@@ -1,32 +1,27 @@
 ---
-// ここは「ロジック」を書く場所です（JavaScript）
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
 interface Props {
 	title: string;
 	description?: string;
 	image?: string;
-    // JSON-LD用のデータを受け取る
     artDate?: string;
     location?: string;
 }
 
 const { title, description, image, artDate, location } = Astro.props;
 
-// JSON-LD（AIへの隠し手紙）の自動生成
+// JSON-LD（前回と同じ）
 const schemaData = {
   "@context": "https://schema.org",
   "@type": "VisualArtwork",
   "name": title,
   "description": description,
-  "image": image, // 画像URL
-  "dateCreated": artDate, // 制作日
-  "contentLocation": {
-    "@type": "Place",
-    "name": location // 場所
-  },
-  "creator": {
-    "@type": "Person",
-    "name": "Maestro (Digital Old Masters)"
-  }
+  "image": image,
+  "dateCreated": artDate,
+  "contentLocation": { "@type": "Place", "name": location },
+  "creator": { "@type": "Person", "name": "Maestro" }
 };
 ---
 
@@ -36,62 +31,58 @@ const schemaData = {
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✒️</text></svg>" />
 		<title>{title}</title>
         <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
 	</head>
 	<body>
-        <header>
-            <nav>
-                <a href={import.meta.env.BASE_URL}>Digital Old Masters</a>
-            </nav>
-        </header>
+        <Header />
+        
+		<main data-pagefind-body> <slot />
+		</main>
 
-        <main>
-			<slot /> </main>
-
-        <footer>
-            <p>&copy; 2026 Digital Old Masters. All rights reserved.</p>
-        </footer>
+        <Footer />
 	</body>
 </html>
 
 <style is:global>
 	:root {
-        /* 色の定義 */
-		--c-bg: #F9F7F1; /* 古紙のようなオフホワイト */
-		--c-text: #333333; /* 目に優しいブラック */
-		--c-accent: #CD853F; /* Toffee Brown (ペリカンのインク色) */
+		--c-bg: #F9F7F1;
+		--c-text: #333333;
+		--c-accent: #CD853F;
         --font-serif: "Times New Roman", "YuMincho", serif;
 	}
 	html {
 		font-family: var(--font-serif);
 		background: var(--c-bg);
 		color: var(--c-text);
-        line-height: 1.8; /* ゆったりとした行間 */
+        line-height: 1.8;
+        scroll-behavior: smooth; /* スムーズスクロール */
 	}
     body {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    main {
         max-width: 800px;
         margin: 0 auto;
         padding: 2rem;
+        min-height: 60vh;
     }
-    a {
-        color: var(--c-accent);
-        text-decoration: none;
     
-    }
-    h1, h2, h3 {
-        font-weight: normal;
-        letter-spacing: 0.05em;
-    }
-/* 記事内の画像のスタイル制御 */
-    main img {
-        max-width: 100%;       /* 横幅は画面からはみ出さない */
-        max-height: 500px;     /* 高さは最大500pxに制限（これ以上大きくならない） */
-        width: auto;           /* アスペクト比を維持 */
-        display: block;        /* ブロック要素として扱う */
-        margin: 2rem auto;     /* 上下に余白を取り、左右は中央揃え */
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* わずかに影を落とし、紙の上に浮き上がらせる */
-        border-radius: 2px;    /* 角をほんの少しだけ丸める */
-    }
+    /* リンク等のスタイルは前回と同じ */
+    a { color: var(--c-accent); text-decoration: none; }
+    h1, h2, h3 { font-weight: normal; letter-spacing: 0.05em; }
 
+    /* 記事内の画像の制御 */
+    main img {
+        max-width: 100%;
+        max-height: 500px;
+        width: auto;
+        display: block;
+        margin: 2rem auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        border-radius: 2px;
+    }
 </style>

@@ -1,0 +1,95 @@
+---
+interface Props {
+  videoId: string;
+  title: string;
+}
+const { videoId, title } = Astro.props;
+---
+
+<div class="video-container" data-id={videoId}>
+    <div class="play-button" aria-label="Play Video">
+        <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+    </div>
+    <img 
+        src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+        alt={title} 
+        loading="lazy"
+    />
+    <iframe 
+        class="youtube-iframe"
+        title={title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen
+    ></iframe>
+</div>
+
+<script>
+    // クリックしたらiframeのsrcを入れて読み込む（軽量化ロジック）
+    const containers = document.querySelectorAll('.video-container');
+    containers.forEach(c => {
+        c.addEventListener('click', () => {
+            const id = c.getAttribute('data-id');
+            const iframe = c.querySelector('iframe');
+            if (iframe && !iframe.src) {
+                iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+                c.classList.add('playing');
+            }
+        });
+    });
+</script>
+
+<style>
+    .video-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        background: #000;
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: 2px;
+    }
+    img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+    .video-container:hover img { opacity: 0.6; }
+    
+    .play-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        z-index: 2;
+        transition: transform 0.2s;
+    }
+    .video-container:hover .play-button { transform: translate(-50%, -50%) scale(1.1); }
+
+    .youtube-iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s;
+        z-index: 3;
+    }
+    
+    /* 再生中はiframeを表示 */
+    .video-container.playing .youtube-iframe {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .video-container.playing img, .video-container.playing .play-button {
+        display: none;
+    }
+</style>

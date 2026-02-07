@@ -1,28 +1,45 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import LiteYouTube from '../components/LiteYouTube.astro';
 
-// 記事データを全取得する（ここがAstroの魔法です）
-const allPosts = Object.values(import.meta.glob('./posts/*.md', { eager: true }));
+// 全記事を取得して日付順に並べ替え
+const allPosts = Object.values(import.meta.glob('./posts/*.md', { eager: true }))
+    .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
+
+// タグの抽出（重複削除）
+const allTags = [...new Set(allPosts.flatMap((post: any) => post.frontmatter.tags || []))];
 ---
 
 <Layout title="Digital Old Masters" description="Archiving beauty into the semantic layer.">
 	
-	<section class="intro">
+	<section class="hero">
 		<h1>Digital Old Masters</h1>
-		<p class="subtitle">The Anchor of Beauty.</p>
+		<p class="subtitle">Archiving beauty into the semantic layer.</p>
 	</section>
 
-	<section class="post-list">
+    <section class="atelier">
+        <h2>Atelier</h2>
+        <LiteYouTube videoId="DYC-Vio6TlY" title="Drawing Process" />
+        <p class="caption">Process: Layer 1 to Layer 2</p>
+    </section>
+
+    <section class="gallery">
 		<h2>Journal</h2>
 		<div class="grid">
 			{allPosts.map((post: any) => (
 				<a href={post.url} class="card">
 					<article>
-                        {post.frontmatter.image && <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} />}
+                        {post.frontmatter.image && 
+                         <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} />
+                        }
 						<div class="content">
                             <span class="date">{post.frontmatter.artDate}</span>
                             <h3>{post.frontmatter.title}</h3>
-                            <p>{post.frontmatter.description}</p>
+                            <div class="tags">
+                                {post.frontmatter.tags && post.frontmatter.tags.map((tag: string) => (
+                                    <span class="tag">#{tag}</span>
+                                ))}
+                            </div>
                         </div>
 					</article>
 				</a>
@@ -30,88 +47,69 @@ const allPosts = Object.values(import.meta.glob('./posts/*.md', { eager: true })
 		</div>
 	</section>
 
+    <section class="taxonomy">
+        <h2>Concepts</h2>
+        <div class="tag-cloud">
+            {allTags.map((tag) => (
+                <a href={`${import.meta.env.BASE_URL}tags/${tag}`} class="tag-link">{tag}</a>
+            ))}
+        </div>
+    </section>
+
 </Layout>
 
 <style>
-    /* トップページ専用のスタイル */
-    .intro {
-        text-align: center;
-        margin-bottom: 4rem;
-        padding-top: 2rem;
-    }
-    h1 {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-        font-family: var(--font-serif);
-    }
-    .subtitle {
-        color: #666;
-        font-style: italic;
+    /* セクション間の余白 */
+    section { margin-bottom: 5rem; }
+
+    .hero { text-align: center; padding-top: 3rem; }
+    h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .subtitle { color: #666; font-style: italic; }
+
+    h2 { 
+        font-size: 1rem; 
+        color: #999; 
+        text-transform: uppercase; 
+        letter-spacing: 0.1em; 
+        border-bottom: 1px solid #E0Dbd0; 
+        padding-bottom: 0.5rem;
+        margin-bottom: 2rem;
     }
 
+    /* Atelier */
+    .caption { font-size: 0.8rem; text-align: right; color: #999; margin-top: 0.5rem; }
+
+    /* Gallery (Grid) */
     .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 2rem;
     }
-
     .card {
         display: block;
         border: 1px solid #E0Dbd0;
         border-radius: 4px;
         overflow: hidden;
-        transition: transform 0.2s, box-shadow 0.2s;
         background: #fff;
-        text-decoration: none; /* リンクの下線を消す */
+        transition: transform 0.2s, box-shadow 0.2s;
     }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .card img { width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid #E0Dbd0; margin: 0; }
+    .content { padding: 1.2rem; }
+    .date { font-size: 0.75rem; color: var(--c-accent); display: block; margin-bottom: 0.3rem; }
+    .card h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--c-text); }
     
-    .card article {
-        margin: 0; /* 余計な隙間を排除 */
-        padding: 0;
-    }
+    .tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .tag { font-size: 0.7rem; color: #999; }
 
-    .card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        display: block; /* これが重要：画像下の隙間を消す */
-        border-bottom: 1px solid #E0Dbd0;
-        margin: 0; /* 画像周りの隙間を排除 */
+    /* Taxonomy */
+    .tag-cloud { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .tag-link { 
+        font-size: 0.9rem; 
+        color: #666; 
+        padding: 0.2rem 0.5rem; 
+        border: 1px solid transparent; 
+        transition: 0.2s; 
     }
-    
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    
-    .card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-bottom: 1px solid #E0Dbd0;
-    }
-
-    .content {
-        padding: 1.5rem;
-    }
-
-    .date {
-        font-size: 0.8rem;
-        color: var(--c-accent);
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-    
-    h3 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1.2rem;
-        color: var(--c-text);
-    }
-    
-    p {
-        font-size: 0.9rem;
-        color: #666;
-        margin: 0;
-        line-height: 1.6;
-    }
+    .tag-link:hover { border-color: var(--c-accent); color: var(--c-accent); }
 </style>
