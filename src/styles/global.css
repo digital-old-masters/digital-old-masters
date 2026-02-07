@@ -213,8 +213,11 @@ h2 {
 .footer-search-wrapper {
     max-width: 400px;
     width: 100%;
-    /* 検索とSNSを分離する広大な余白 */
-    margin: 0 auto 6rem auto; 
+    
+    /* 【修正】6rem(約96px) → 3.5rem(約56px) に変更 */
+    /* 親の gap: 1.5rem と合わせて、合計 5rem の美しい余白になります */
+    margin: 0 auto 3.5rem auto; 
+    
     text-align: left;
 }
 
