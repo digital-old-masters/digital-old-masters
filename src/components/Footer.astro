@@ -7,25 +7,11 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 <script src={`${basePath}/pagefind/pagefind-ui.js`} is:inline></script>
 
 <footer class="site-footer">
-    
-    <div class="footer-search-wrapper">
-        <div id="search-box"></div>
-    </div>
-
     <div class="footer-content">
         
-        <div class="footer-branding">
-            <span class="footer-title">Digital Old Masters</span>
-            <p class="footer-tagline">Archiving beauty into the semantic layer.</p>
+        <div class="footer-search-wrapper">
+            <div id="search-box"></div>
         </div>
-
-        <nav class="footer-nav" aria-label="Footer Navigation">
-            <a href={`${basePath}/`}>Home</a>
-            <span class="separator">/</span>
-            <a href={`${basePath}/archives`}>Archives</a>
-            <span class="separator">/</span>
-            <a href="https://www.youtube.com/@DigiOldMasters" target="_blank" rel="noopener">Atelier</a>
-        </nav>
 
         <div class="footer-socials">
             <a href="https://twitter.com/your_twitter_id" target="_blank" rel="noopener" aria-label="Follow on X (Twitter)">
@@ -48,7 +34,7 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
         element: "#search-box", 
         showSubResults: true,
         showImages: false,
-        translations: { placeholder: "Search the archive..." } // プレースホルダーを美しく
+        translations: { placeholder: "Search the archive..." }
     });
   });
 </script>
