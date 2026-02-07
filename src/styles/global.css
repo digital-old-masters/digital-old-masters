@@ -214,9 +214,9 @@ h2 {
     max-width: 400px;
     width: 100%;
     
-    /* 【修正】6rem(約96px) → 3.5rem(約56px) に変更 */
-    /* 親の gap: 1.5rem と合わせて、合計 5rem の美しい余白になります */
-    margin: 0 auto 3.5rem auto; 
+    /* 【修正】3.5rem → 1.5rem に変更 */
+    /* 親の gap: 1.5rem と合わせて、合計 3rem の完璧なバランスになります */
+    margin: 0 auto 1.5rem auto; 
     
     text-align: left;
 }
