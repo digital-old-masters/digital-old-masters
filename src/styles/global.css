@@ -197,3 +197,123 @@ h2 {
 .related-grid .card-image {
     height: 150px; 
 }
+/* --- Footer Styles (Integrated Search) --- */
+
+.site-footer {
+    margin-top: 6rem;
+    padding: 4rem 0 3rem;
+    border-top: 1px solid #E0Dbd0;
+    text-align: center;
+    font-family: var(--font-serif);
+}
+
+/* Layer 1: Search Wrapper */
+.footer-search-wrapper {
+    max-width: 400px; /* 検索ボックスは広すぎないように制限 */
+    margin: 0 auto 4rem auto; /* 下のコンテンツとの間に十分な余白 */
+    text-align: left; /* 入力文字は左揃え */
+}
+
+/* Layer 2: Content Layout */
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+/* --- Branding --- */
+.footer-title {
+    font-size: 1.2rem;
+    letter-spacing: 0.1em;
+    color: #333;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+.footer-tagline {
+    font-size: 0.9rem;
+    color: #999;
+    font-style: italic;
+    margin: 0;
+}
+
+/* --- Navigation --- */
+.footer-nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+}
+.footer-nav a {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.footer-nav a:hover { color: #CD853F; }
+.footer-nav .separator { color: #ddd; font-size: 0.8rem; }
+
+/* --- Socials --- */
+.footer-socials {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+.footer-socials a {
+    color: #999;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+.footer-socials a:hover {
+    color: #CD853F;
+    background: rgba(205, 133, 63, 0.1);
+    transform: translateY(-2px);
+}
+
+/* --- Copyright --- */
+.footer-copyright {
+    font-size: 0.75rem;
+    color: #ccc;
+    font-family: sans-serif;
+    letter-spacing: 0.05em;
+}
+
+/* --- Pagefind UI Overrides (サイトの美学に統合) --- */
+:root {
+    --pagefind-ui-scale: 0.85; /* 少し小さく上品に */
+    --pagefind-ui-primary: #CD853F; /* アクセントカラー */
+    --pagefind-ui-text: #333;
+    --pagefind-ui-background: #fff;
+    --pagefind-ui-border: #E0Dbd0;
+    --pagefind-ui-tag: #F9F7F1;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 2px;
+    --pagefind-ui-font: "Times New Roman", "YuMincho", serif;
+}
+
+/* 具体的な微調整 */
+.pagefind-ui__search-input {
+    background-color: transparent !important;
+    border-color: #E0Dbd0 !important;
+    font-weight: normal !important;
+    padding-left: 1rem !important;
+}
+.pagefind-ui__search-input:focus {
+    border-color: #CD853F !important;
+    outline: none !important;
+}
+.pagefind-ui__result {
+    border-color: #E0Dbd0 !important;
+    padding: 1rem 0 !important;
+}
+.pagefind-ui__result-excerpt {
+    font-size: 0.85rem !important;
+    color: #666 !important;
+}
+/* 不要な「Pagefind」ロゴなどを消す場合 */
+.pagefind-ui__credit { display: none !important; }

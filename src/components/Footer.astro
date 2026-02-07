@@ -1,62 +1,54 @@
 ---
 const today = new Date();
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
-<footer id="index">
-  <div class="search-section" id="search">
-    <h3>Index & Search</h3>
-    <div id="search-box"></div> </div>
+<link href={`${basePath}/pagefind/pagefind-ui.css`} rel="stylesheet">
+<script src={`${basePath}/pagefind/pagefind-ui.js`} is:inline></script>
 
-  <div class="copyright">
-    &copy; {today.getFullYear()} Digital Old Masters. <br>
-    Archiving beauty into the semantic layer.
-  </div>
+<footer class="site-footer">
+    
+    <div class="footer-search-wrapper">
+        <div id="search-box"></div>
+    </div>
+
+    <div class="footer-content">
+        
+        <div class="footer-branding">
+            <span class="footer-title">Digital Old Masters</span>
+            <p class="footer-tagline">Archiving beauty into the semantic layer.</p>
+        </div>
+
+        <nav class="footer-nav" aria-label="Footer Navigation">
+            <a href={`${basePath}/`}>Home</a>
+            <span class="separator">/</span>
+            <a href={`${basePath}/archives`}>Archives</a>
+            <span class="separator">/</span>
+            <a href="https://www.youtube.com/@DigiOldMasters" target="_blank" rel="noopener">Atelier</a>
+        </nav>
+
+        <div class="footer-socials">
+            <a href="https://twitter.com/your_twitter_id" target="_blank" rel="noopener" aria-label="Follow on X (Twitter)">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://www.youtube.com/@DigiOldMasters" target="_blank" rel="noopener" aria-label="Subscribe on YouTube">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+        </div>
+
+        <small class="footer-copyright">
+            &copy; {today.getFullYear()} Maestro. All rights reserved.
+        </small>
+    </div>
 </footer>
 
-<link href={import.meta.env.BASE_URL + "/pagefind/pagefind-ui.css"} rel="stylesheet">
-<script src={import.meta.env.BASE_URL + "/pagefind/pagefind-ui.js"} is:inline></script>
 <script is:inline>
   window.addEventListener('DOMContentLoaded', () => {
     new PagefindUI({ 
         element: "#search-box", 
         showSubResults: true,
-        showImages: false 
+        showImages: false,
+        translations: { placeholder: "Search the archive..." } // プレースホルダーを美しく
     });
   });
 </script>
-
-<style>
-  footer {
-    margin-top: 4rem;
-    padding: 4rem 2rem;
-    border-top: 1px solid #E0Dbd0;
-    text-align: center;
-  }
-  .search-section {
-    max-width: 500px;
-    margin: 0 auto 3rem auto;
-    text-align: left;
-  }
-  .search-section h3 {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 1rem;
-    font-weight: normal;
-  }
-  .copyright {
-    font-size: 0.8rem;
-    color: #999;
-    line-height: 1.6;
-  }
-  
-  /* PagefindのUIをサイトの美学に合わせる上書きCSS */
-  :global(.pagefind-ui__search-input) {
-    background: transparent !important;
-    border: 1px solid #E0Dbd0 !important;
-    font-family: var(--font-serif) !important;
-    border-radius: 2px !important;
-  }
-  :global(.pagefind-ui__result) {
-    border-color: #E0Dbd0 !important;
-  }
-</style>
