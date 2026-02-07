@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 
 export async function getStaticPaths() {
-  const allPosts = Object.values(import.meta.glob('../posts/*.md', { eager: true }));
+  const allPosts = Object.values(import.meta.glob('../posts/*.{md,mdx}', { eager: true }));
   const uniqueTags = [...new Set(allPosts.flatMap((post: any) => post.frontmatter.tags || []))];
   
   return uniqueTags.map((tag) => {

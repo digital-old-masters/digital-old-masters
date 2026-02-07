@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const allPosts = Object.values(import.meta.glob('./posts/*.md', { eager: true }))
+  const allPosts = Object.values(import.meta.glob('./posts/*.{md,mdx}', { eager: true }))
     .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
   
   return paginate(allPosts, { pageSize: 9 });

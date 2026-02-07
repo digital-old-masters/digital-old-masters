@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const allPosts = Object.values(import.meta.glob('./posts/*.md', { eager: true }))
+const allPosts = Object.values(import.meta.glob('./posts/*.{md,mdx}', { eager: true }))
     .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
 
 // 型定義の修正: acc に型 (Record<string, any[]>) を指定
