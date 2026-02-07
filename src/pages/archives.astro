@@ -88,7 +88,18 @@ const breadcrumbs = [
     .timeline-list li { margin-bottom: 1rem; position: relative; }
     .timeline-list li::before { content: ''; position: absolute; left: -1.5rem; top: 0.5em; width: 8px; height: 8px; background: #fff; border: 2px solid var(--c-accent); border-radius: 50%; transform: translate(-50%, -50%); }
     .timeline-list .date { color: #999; font-size: 0.85rem; margin-right: 1rem; min-width: 60px; display: inline-block; }
-    .timeline-list a { font-size: 1.1rem; color: var(--c-text); }
+   .timeline-list a { 
+        font-size: 1.1rem; 
+        color: var(--c-text); /* 通常時は落ち着いた色 */
+        text-decoration: none; /* 下線は引かない（シンプルさ維持） */
+        transition: color 0.2s ease, opacity 0.2s ease; /* 滑らかな変化 */
+    }
+
+    /* 【追加】 ホバー時の美しい反応 */
+    .timeline-list a:hover {
+        color: var(--c-accent); /* アクセントカラー(#CD853F)に変化 */
+        opacity: 0.8; /* わずかに透明にして奥行きを出す */
+    }
     
     .category-list { list-style: none; padding: 0; }
     .category-list li { margin-bottom: 0.8rem; }
