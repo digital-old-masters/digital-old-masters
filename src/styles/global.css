@@ -75,7 +75,6 @@ h2 {
     
     /* 【修正】上端に強制的に合わせる */
     display: block;
-    vertical-align: top; /* bottom から top に変更 */
     /* 【追加】念には念を入れてマージンもゼロにする */
     margin: 0;
     padding: 0;
@@ -143,4 +142,51 @@ h2 {
 /* --- Mobile --- */
 @media (max-width: 768px) {
     .grid { grid-template-columns: 1fr; }
+}
+/* --- Post Footer (Share & Related) --- */
+
+.post-footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #E0Dbd0;
+}
+
+/* Share Section */
+.share-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 4rem;
+    justify-content: flex-end; /* 右寄せで控えめに */
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+}
+.share-label { color: #999; font-style: italic; }
+.share-link { 
+    color: #333; 
+    text-decoration: none; 
+    border-bottom: 1px solid transparent; 
+    transition: all 0.2s;
+}
+.share-link:hover { 
+    color: #CD853F; 
+    border-bottom-color: #CD853F; 
+}
+
+/* Related Section */
+.related-section h3 {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #999;
+    font-style: italic;
+    letter-spacing: 0.1em;
+}
+
+/* 関連記事は少し小さめに表示 */
+.related-grid {
+    gap: 1.5rem;
+}
+.related-grid .card-image {
+    height: 150px; /* メインより控えめな高さ */
 }
