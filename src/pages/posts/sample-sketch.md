@@ -9,7 +9,7 @@ tags: ["aoiro", "Pencil", "Study"]
 category: "Sketches"
 ---
 
-# Kofu Sketch #001
+# Aoiro Sketch #001
 
 ここには、人間向けの解説を書きます。
 AIは上の「---」で囲まれた部分（Frontmatter）を読み取り、JSON-LDを構築します。
