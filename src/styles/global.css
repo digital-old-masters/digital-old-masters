@@ -190,3 +190,28 @@ h2 {
 .related-grid .card-image {
     height: 150px; /* メインより控えめな高さ */
 }
+/* src/styles/global.css の最後に追加 */
+
+/* --- Layout Restoration (The Master Container) --- */
+/* コンテンツが画面一杯に広がるのを防ぎ、美しく中央に配置する */
+
+body > header, 
+main, 
+body > footer {
+    max-width: 1080px; /* 読みやすく美しい最大幅 */
+    margin: 0 auto;    /* 左右の余白を自動計算して中央寄せ */
+    padding-left: 2rem;  /* スマホやタブレットで端に張り付かないためのクッション */
+    padding-right: 2rem;
+    width: 100%;
+    box-sizing: border-box; /* パディングを含めた幅計算 */
+}
+
+/* スマホ調整 */
+@media (max-width: 768px) {
+    body > header, 
+    main, 
+    body > footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
