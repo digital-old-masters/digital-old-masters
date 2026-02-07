@@ -143,3 +143,57 @@ h2 {
 @media (max-width: 768px) {
     .grid { grid-template-columns: 1fr; }
 }
+
+/* --- Post Footer (Share & Related) --- */
+/* src/styles/global.css の末尾に追記 */
+
+.post-footer {
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid #E0Dbd0;
+}
+
+/* Share Section */
+.share-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 4rem;
+    justify-content: flex-end; /* 右寄せ */
+    font-family: sans-serif; /* ここだけサンセリフでモダンに */
+    font-size: 0.9rem;
+}
+.share-label { color: #999; font-style: italic; }
+.share-link { 
+    color: #333; 
+    text-decoration: none; 
+    border-bottom: 1px solid transparent; 
+    transition: all 0.2s;
+}
+.share-link:hover { 
+    color: #CD853F; 
+    border-bottom-color: #CD853F; 
+}
+
+/* Related Section */
+.related-section h3 {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    color: #999;
+    font-style: italic;
+    letter-spacing: 0.1em;
+}
+
+/* 関連記事のグリッド調整 */
+.related-grid {
+    gap: 1.5rem;
+    /* 800pxの中に収めるため、少し密度を上げても良いですが
+       global.cssの .grid 設定（minmax 260px）が効くので
+       自動的に2列または1列になり、美しく収まります */
+}
+
+/* 関連記事の画像は控えめな高さに */
+.related-grid .card-image {
+    height: 150px; 
+}

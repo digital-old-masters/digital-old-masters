@@ -4,19 +4,35 @@ import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 
 interface Props {
-	title: string;
-	description?: string;
-	image?: string;
+    title: string;
+    description?: string;
+    image?: string;
     artDate?: string;
     location?: string;
-    // パンくず用のデータを受け取る
     breadcrumbs?: { label: string, href: string }[];
+    frontmatter?: any; /* 【追加】投稿データを受け取るための窓口 */
 }
 
-const { title, description, image, artDate, location, breadcrumbs } = Astro.props;
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, ''); // 末尾のスラッシュを削除
+const { title, description, image, artDate, location, breadcrumbs, frontmatter } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentUrl = Astro.url.href; /* 【追加】シェア用URL */
 
-// JSON-LD (パンくずリストの構造化データも追加)
+/* --- 【追加】ロジック③: 関連記事エンジン --- */
+let relatedPosts: any[] = [];
+// frontmatter（投稿データ）があり、かつタグがある場合のみ動く
+if (frontmatter && frontmatter.tags) {
+    const allPosts = Object.values(import.meta.glob('../pages/posts/*.md', { eager: true }));
+    relatedPosts = allPosts
+        .filter((post: any) => 
+            post.url !== Astro.url.pathname && // 自分自身は除外
+            post.frontmatter.tags &&
+            post.frontmatter.tags.some((t: string) => frontmatter.tags.includes(t)) // 同じタグを含む
+        )
+        .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime())
+        .slice(0, 3); // 最大3件
+}
+
+// JSON-LD
 const schemaData = {
   "@context": "https://schema.org",
   "@graph": [
@@ -29,7 +45,6 @@ const schemaData = {
         "contentLocation": { "@type": "Place", "name": location },
         "creator": { "@type": "Person", "name": "Maestro" }
     },
-    // パンくずリストの構造化データ
     breadcrumbs ? {
         "@type": "BreadcrumbList",
         "itemListElement": breadcrumbs.map((crumb, index) => ({
@@ -39,31 +54,30 @@ const schemaData = {
             "item": new URL(crumb.href.replace(/^\//, ''), Astro.site).toString()
         }))
     } : null
-  ].filter(Boolean) // nullを除外
+  ].filter(Boolean)
 };
 ---
 
 <!doctype html>
 <html lang="ja">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content={description} />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✒️</text></svg>" />
-		<title>{title} | Digital Old Masters</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✒️</text></svg>" />
+        <title>{title} | Digital Old Masters</title>
         <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
-	</head>
-	<body>
+    </head>
+    <body>
         <Header />
         
-		<main data-pagefind-body>
+        <main data-pagefind-body>
             {breadcrumbs && (
                 <nav class="breadcrumbs" aria-label="Breadcrumb">
                     <ol>
                         {breadcrumbs.map((crumb, index) => (
                             <li>
                                 {index === breadcrumbs.length - 1 ? (
-                                    // 最後はリンクなし（現在地）
                                     <span aria-current="page">{crumb.label}</span>
                                 ) : (
                                     <a href={baseUrl + crumb.href}>{crumb.label}</a>
@@ -74,43 +88,83 @@ const schemaData = {
                 </nav>
             )}
 
-			<slot />
-		</main>
+            <slot />
+
+            {frontmatter && (
+                <div class="post-footer">
+                    
+                    <div class="share-section">
+                        <span class="share-label">Share:</span>
+                        <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(currentUrl)}`} target="_blank" rel="noopener noreferrer" class="share-link">
+                            X (Twitter)
+                        </a>
+                    </div>
+
+                    {relatedPosts.length > 0 && (
+                        <div class="related-section">
+                            <h3>Related Works</h3>
+                            <div class="grid related-grid">
+                                {relatedPosts.map((post: any) => (
+                                    <article class="card">
+                                        <div class="card-image" style="height: 150px;">
+                                            {post.frontmatter.image && 
+                                            <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
+                                            }
+                                        </div>
+                                        <div class="content" style="padding: 1rem;">
+                                            <div class="meta">
+                                                <span class="date">{post.frontmatter.artDate}</span>
+                                            </div>
+                                            <h3 style="font-size: 1rem; margin: 0.5rem 0;">
+                                                <a href={post.url} class="main-link">
+                                                    {post.frontmatter.title}
+                                                </a>
+                                            </h3>
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+        </main>
 
         <Footer />
-	</body>
+    </body>
 </html>
 
 <style is:global>
-	/* ...以前のスタイルと同じ... */
+    /* 元のスタイルを完全に維持 */
     :root {
-		--c-bg: #F9F7F1;
-		--c-text: #333333;
-		--c-accent: #CD853F;
+        --c-bg: #F9F7F1;
+        --c-text: #333333;
+        --c-accent: #CD853F;
         --font-serif: "Times New Roman", "YuMincho", serif;
         --base-url: {import.meta.env.BASE_URL};
-	}
-	html {
-		font-family: var(--font-serif);
-		background: var(--c-bg);
-		color: var(--c-text);
+    }
+    html {
+        font-family: var(--font-serif);
+        background: var(--c-bg);
+        color: var(--c-text);
         line-height: 1.8;
         scroll-behavior: smooth;
-	}
+    }
     body { margin: 0; padding: 0; }
+    
+    /* 【重要】この行がレイアウト崩壊を防いでいる守護神です */
     main { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; min-height: 60vh; }
+    
     a { color: var(--c-accent); text-decoration: none; transition: opacity 0.2s; }
     a:hover { opacity: 0.8; }
     h1, h2, h3 { font-weight: normal; letter-spacing: 0.05em; }
     
-    /* パンくずリストのスタイル */
     .breadcrumbs { margin-bottom: 2rem; font-size: 0.85rem; color: #999; }
     .breadcrumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; }
     .breadcrumbs li:not(:last-child)::after { content: "›"; margin: 0 0.5rem; color: #ccc; }
     .breadcrumbs a { color: #666; }
     .breadcrumbs span[aria-current="page"] { color: #333; }
 
-    /* 記事内のスタイル */
     main img { max-width: 100%; height: auto; display: block; margin: 2.5rem auto; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 2px; }
     article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
     .meta-info { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
