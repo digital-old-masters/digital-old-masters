@@ -203,8 +203,12 @@ h2 {
 
 /* --- Footer Styles (Centralized & Spacious) --- */
 
+/* src/styles/global.css の末尾を上書き */
+
+/* --- Footer Styles (The Void & The Signature) --- */
+
 .site-footer {
-    margin-top: 8rem; /* フッター自体の上の余白もたっぷりと */
+    margin-top: 8rem;
     padding: 4rem 0 4rem;
     border-top: 1px solid #E0Dbd0;
     text-align: center;
@@ -214,34 +218,31 @@ h2 {
 .footer-content {
     display: flex;
     flex-direction: column;
-    align-items: center; /* 縦方向の軸を中央に */
+    align-items: center;
     
-    /* 【重要】要素間の余白を一括管理し、十分に広げる */
-    gap: 3rem; 
+    /* 【変更】署名エリア（SNSとコピーライト）の結束を高めるため、基本の隙間は狭くする */
+    gap: 1.5rem; 
 }
 
-/* 1. Search Wrapper */
-/* src/styles/global.css の .footer-search-wrapper 部分を修正 */
-
+/* 1. Search Wrapper (The Tool) */
 .footer-search-wrapper {
     max-width: 400px;
     width: 100%;
     
-    /* 【修正】下に3remの余白を追加し、SNSとの距離を広げる */
-    /* gap: 3rem と合算され、合計 6rem 分の広いスペースが生まれます */
-    margin: 0 auto 3rem auto;
+    /* 【変更】ここが重要です。検索ボックスの下に「6rem」という広大な余白を作り、
+       下の署名エリアと完全に切り離します。 */
+    margin: 0 auto 6rem auto; 
     
     text-align: left;
 }
 
-/* 2. Socials */
+/* 2. Socials (The Connection) */
 .footer-socials {
     display: flex;
-    gap: 2rem; /* アイコン同士の間隔も少し広めに */
-    
-    /* 【重要】内部のアイコンを強制的に中央揃えにする */
+    gap: 2rem; 
     justify-content: center; 
     width: 100%;
+    /* SNSの下の余白は親の gap: 1.5rem に任せる */
 }
 
 .footer-socials a {
@@ -259,7 +260,7 @@ h2 {
     transform: translateY(-2px);
 }
 
-/* 3. Copyright */
+/* 3. Copyright (The Seal) */
 .footer-copyright {
     font-size: 0.75rem;
     color: #ccc;
@@ -269,6 +270,7 @@ h2 {
 
 
 /* --- Pagefind UI Overrides --- */
+/* (ここは変更なしですが、一貫性のために含めます) */
 :root {
     --pagefind-ui-scale: 0.85;
     --pagefind-ui-primary: #CD853F;
@@ -285,10 +287,7 @@ h2 {
     background-color: transparent !important;
     border-color: #E0Dbd0 !important;
     font-weight: normal !important;
-    
-    /* 虫眼鏡アイコンのための左余白 */
     padding-left: 2.8rem !important; 
-    
     padding-top: 0.8rem !important;
     padding-bottom: 0.8rem !important;
 }
