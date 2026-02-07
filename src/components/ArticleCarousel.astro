@@ -1,0 +1,39 @@
+---
+/* The Shelf: 最新の作品を陳列する横スクロールコンポーネント */
+interface Props {
+  posts: any[];
+  title?: string;
+}
+
+const { posts, title = "Latest Sketches" } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<section class="carousel-section">
+  {title && <h2>{title}</h2>}
+  
+  <div class="carousel-container">
+    {posts.map((post) => (
+      <article class="carousel-card">
+        <a href={post.url} class="carousel-link">
+           <div class="carousel-image">
+              {post.frontmatter.image && 
+                <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
+              }
+           </div>
+           <div class="carousel-content">
+              <span class="carousel-date">{post.frontmatter.artDate}</span>
+              <h3>{post.frontmatter.title}</h3>
+              <div class="carousel-tags">
+                  {post.frontmatter.tags && post.frontmatter.tags.slice(0, 3).map((tag: string) => (
+                      <span class="carousel-tag">#{tag}</span>
+                  ))}
+              </div>
+           </div>
+        </a>
+      </article>
+    ))}
+    {/* 右端の余白用スペーサー */}
+    <div class="carousel-spacer"></div>
+  </div>
+</section>

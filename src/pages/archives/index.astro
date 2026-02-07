@@ -1,0 +1,120 @@
+---
+/* src/pages/archives/index.astro */
+import Layout from '../../layouts/Layout.astro';
+
+/* 全記事取得とソート */
+const allPosts = Object.values(import.meta.glob('../posts/*.{md,mdx}', { eager: true }))
+    .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
+
+/* 年ごとにグループ化 */
+const postsByYear = allPosts.reduce((acc: Record<string, any[]>, post: any) => {
+    const year = new Date(post.frontmatter.artDate).getFullYear().toString();
+    if (!acc[year]) acc[year] = [];
+    acc[year].push(post);
+    return acc;
+}, {});
+const years = Object.keys(postsByYear).sort((a, b) => b.localeCompare(a));
+
+/* サイドバー用データ */
+const categories = [...new Set(allPosts.map((post: any) => post.frontmatter.category).filter(Boolean))].sort();
+const tags = [...new Set(allPosts.flatMap((post: any) => post.frontmatter.tags || []))].sort();
+
+/* 設定 */
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const breadcrumbs = [
+    { label: 'Home', href: '/' },
+    { label: 'Archives', href: '/archives' }
+];
+
+/* プレビュー枚数制限 (12枚) */
+const PREVIEW_LIMIT = 12;
+---
+
+<Layout title="Archives" description="The complete timeline of works." breadcrumbs={breadcrumbs}>
+    <section class="page-header">
+        <h1>Archives</h1>
+        <p class="subtitle">The complete collection.</p>
+    </section>
+
+    <div class="archive-container">
+        
+        {/* Main Column: Timeline Overview */}
+        <section class="archive-section timeline">
+            <h2>Timeline Overview</h2>
+            <div class="timeline-list">
+                {years.map(year => {
+                    const yearPosts = postsByYear[year];
+                    const isOverflow = yearPosts.length > PREVIEW_LIMIT;
+                    /* 上限を超えた場合はカット、そうでなければ全件表示 */
+                    const displayPosts = isOverflow ? yearPosts.slice(0, PREVIEW_LIMIT) : yearPosts;
+
+                    return (
+                        <div class="year-group">
+                            <div class="year-meta-header">
+                                <h3>
+                                    <a href={`${baseUrl}/archives/${year}`} class="year-link">{year}</a>
+                                </h3>
+                                <span class="year-count">{yearPosts.length} pieces</span>
+                            </div>
+                            
+                            {/* グリッド表示 (Overlay Style) */}
+                            <div class="year-grid">
+                                {displayPosts.map((post: any) => (
+                                    <a href={post.url} class="preview-card">
+                                        <div class="image-wrapper">
+                                            {post.frontmatter.image && 
+                                                <img src={import.meta.env.BASE_URL + post.frontmatter.image} 
+                                                     alt={post.frontmatter.title} 
+                                                     loading="lazy" />
+                                            }
+                                        </div>
+                                        {/* オーバーレイ情報 (CSSで制御) */}
+                                        <div class="card-overlay">
+                                            <div class="card-info">
+                                                <span class="card-date">{post.frontmatter.artDate}</span>
+                                                <h4 class="card-title">{post.frontmatter.title}</h4>
+                                            </div>
+                                        </div>
+                                    </a>
+                                ))}
+                                
+                                {/* もっと見るボタン (枠のみ) */}
+                                {isOverflow && (
+                                    <a href={`${baseUrl}/archives/${year}`} class="more-link-card">
+                                        <div class="more-content">
+                                            <span class="more-label">View All</span>
+                                            <span class="more-count">+{yearPosts.length - PREVIEW_LIMIT}</span>
+                                        </div>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+
+        {/* Sidebar: Categories & Tags */}
+        <aside class="archive-sidebar">
+            <section class="archive-section">
+                <h2>Categories</h2>
+                <ul class="category-list">
+                    {categories.map(category => (
+                        <li>
+                            <a href={`${baseUrl}/category/${(category as string).toLowerCase()}`}>{category}</a>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
+            <section class="archive-section">
+                <h2>Concept Tags</h2>
+                <div class="tag-cloud">
+                    {tags.map(tag => (
+                        <a href={`${baseUrl}/tags/${tag}`} class="tag-link">#{tag}</a>
+                    ))}
+                </div>
+            </section>
+        </aside>
+    </div>
+</Layout>

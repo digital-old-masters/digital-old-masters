@@ -1,51 +1,54 @@
 ---
+/* src/pages/archives/[year].astro */
 import Layout from '../../layouts/Layout.astro';
 
 export async function getStaticPaths() {
   const allPosts = Object.values(import.meta.glob('../posts/*.{md,mdx}', { eager: true }));
-  const uniqueCategories = [...new Set(allPosts.map((post: any) => post.frontmatter.category).filter(Boolean))];
+  const uniqueYears = [...new Set(allPosts.map((post: any) => 
+    new Date(post.frontmatter.artDate).getFullYear().toString()
+  ))];
   
-  return uniqueCategories.map((category) => {
+  return uniqueYears.map((year) => {
     const filteredPosts = allPosts.filter((post: any) => 
-      post.frontmatter.category === category
+      new Date(post.frontmatter.artDate).getFullYear().toString() === year
     ).sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
+    
     return {
-      params: { category: (category as string).toLowerCase() },
-      props: { categoryName: category, posts: filteredPosts },
+      params: { year },
+      props: { posts: filteredPosts },
     };
   });
 }
 
-const { category } = Astro.params;
-const { categoryName, posts } = Astro.props;
+const { year } = Astro.params;
+const { posts } = Astro.props;
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
-
 const breadcrumbs = [
     { label: 'Home', href: '/' },
     { label: 'Archives', href: '/archives' },
-    { label: categoryName, href: `/category/${category}` }
+    { label: year, href: `/archives/${year}` }
 ];
 ---
 
-<Layout title={`Category: ${categoryName}`} description={`Articles in ${categoryName}`} breadcrumbs={breadcrumbs}>
+<Layout title={`Archives: ${year}`} description={`All works from ${year}`} breadcrumbs={breadcrumbs}>
     <section class="page-header">
-        <h1>{categoryName}</h1>
-        <p>{posts.length} pieces found.</p>
+        <h1>{year}</h1>
+        <p class="subtitle">{posts.length} pieces found in this year.</p>
     </section>
 
-	<section class="gallery">
-		<div class="grid">
-			{posts.map((post: any) => (
-                /* 【修正】トップページと同じ「レイヤード・リンク構造」に統一 */
-				<article class="card">
+    <section class="gallery">
+        <div class="grid">
+            {posts.map((post: any) => (
+                <article class="card">
                     <div class="card-image">
                         {post.frontmatter.image && 
                         <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
                         }
                     </div>
-					<div class="content">
+                    <div class="content">
                         <div class="meta">
                             <span class="date">{post.frontmatter.artDate}</span>
+                            {post.frontmatter.category && <span class="category-label">{post.frontmatter.category}</span>}
                         </div>
                         <h3>
                             <a href={post.url} class="main-link">
@@ -58,8 +61,12 @@ const breadcrumbs = [
                             ))}
                         </div>
                     </div>
-				</article>
-			))}
-		</div>
-	</section>
+                </article>
+            ))}
+        </div>
+    </section>
+
+    <div style="text-align: center; margin-top: 4rem;">
+        <a href={`${baseUrl}/archives`} style="color:#999; text-decoration: underline;">← Back to Archives Overview</a>
+    </div>
 </Layout>
