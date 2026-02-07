@@ -3,7 +3,6 @@ import Layout from '../../layouts/Layout.astro';
 
 export async function getStaticPaths() {
   const allPosts = Object.values(import.meta.glob('../posts/*.md', { eager: true }));
-  // 全カテゴリを抽出してユニークにする
   const uniqueCategories = [...new Set(allPosts.map((post: any) => post.frontmatter.category).filter(Boolean))];
   
   return uniqueCategories.map((category) => {
@@ -11,7 +10,7 @@ export async function getStaticPaths() {
       post.frontmatter.category === category
     ).sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
     return {
-      params: { category: category.toLowerCase() }, // URLは小文字にする
+      params: { category: (category as string).toLowerCase() },
       props: { categoryName: category, posts: filteredPosts },
     };
   });
@@ -23,7 +22,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const breadcrumbs = [
     { label: 'Home', href: '/' },
-    { label: 'Categories', href: '/archives#categories' },
+    { label: 'Archives', href: '/archives' },
     { label: categoryName, href: `/category/${category}` }
 ];
 ---
@@ -34,49 +33,33 @@ const breadcrumbs = [
         <p>{posts.length} pieces found.</p>
     </section>
 
-    <section class="gallery">
+	<section class="gallery">
 		<div class="grid">
 			{posts.map((post: any) => (
-				<a href={post.url} class="card">
-					<article>
-                        <div class="card-image">
-                            {post.frontmatter.image && 
-                            <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
-                            }
+                /* 【修正】トップページと同じ「レイヤード・リンク構造」に統一 */
+				<article class="card">
+                    <div class="card-image">
+                        {post.frontmatter.image && 
+                        <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
+                        }
+                    </div>
+					<div class="content">
+                        <div class="meta">
+                            <span class="date">{post.frontmatter.artDate}</span>
                         </div>
-						<div class="content">
-                            <div class="meta">
-                                <span class="date">{post.frontmatter.artDate}</span>
-                            </div>
-                            <h3>{post.frontmatter.title}</h3>
-                            <div class="tags">
-                                {post.frontmatter.tags && post.frontmatter.tags.map((tag: string) => (
-                                    <span class="tag">#{tag}</span>
-                                ))}
-                            </div>
+                        <h3>
+                            <a href={post.url} class="main-link">
+                                {post.frontmatter.title}
+                            </a>
+                        </h3>
+                        <div class="tags">
+                            {post.frontmatter.tags && post.frontmatter.tags.map((tag: string) => (
+                                <a href={`${baseUrl}/tags/${tag}`} class="tag">#{tag}</a>
+                            ))}
                         </div>
-					</article>
-				</a>
+                    </div>
+				</article>
 			))}
 		</div>
 	</section>
 </Layout>
-
-<style>
-    /* タグページと同じスタイル */
-    .page-header { text-align: center; margin-bottom: 3rem; }
-    .page-header h1 { font-size: 2rem; color: var(--c-accent); margin-bottom: 0.5rem; }
-    .page-header p { color: #999; font-style: italic; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2.5rem; }
-    .card { display: block; border-radius: 4px; overflow: hidden; background: #fff; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid transparent;}
-    .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: #f0eadd; }
-    .card-image { height: 200px; overflow: hidden; background: #f4f4f4; }
-    .card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-    .card:hover img { transform: scale(1.03); }
-    .content { padding: 1.5rem; }
-    .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; }
-    .date { color: #999; }
-    .card h3 { margin: 0.5rem 0 1rem 0; font-size: 1.2rem; color: var(--c-text); line-height: 1.4; }
-    .tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .tag { font-size: 0.75rem; color: #aaa; }
-</style>
