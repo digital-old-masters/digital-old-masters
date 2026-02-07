@@ -212,12 +212,12 @@ h2 {
 /* 1. Search Wrapper (The Tool) */
 .footer-search-wrapper {
     max-width: 400px;
-    width: 100%;
     
-    /* 【修正】3.5rem → 1.5rem に変更 */
-    /* 親の gap: 1.5rem と合わせて、合計 3rem の完璧なバランスになります */
+    /* 【修正】100% → 90% に変更 */
+    /* これにより、スマホ画面でも左右に必ず余白が生まれます */
+    width: 90%; 
+    
     margin: 0 auto 1.5rem auto; 
-    
     text-align: left;
 }
 
