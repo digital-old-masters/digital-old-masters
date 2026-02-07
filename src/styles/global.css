@@ -25,6 +25,30 @@ h2 {
     font-style: italic; 
 }
 
+/* --- Article Body Images (Markdown Content) --- */
+/* 記事本文内の画像を美しく制御するルール */
+
+main img {
+    display: block;
+    max-width: 100%;       /* 横幅は親要素（画面）を超えない */
+    max-height: 70vh;      /* 【重要】高さは画面の70%まで。残りの30%で文章を読ませる */
+    width: auto;           /* 元のアスペクト比を維持 */
+    margin: 2.5rem auto 1rem; /* 上に余裕、下にキャプション用の隙間 */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* わずかな影で浮き上がらせる */
+    border-radius: 2px;
+}
+
+/* 画像の直後にあるイタリック体のテキスト（キャプション）を美しく */
+main em {
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 2.5rem;
+    font-style: italic;
+    font-family: var(--font-serif);
+}
+
 /* --- Grid Layout --- */
 .grid {
     display: grid;
@@ -36,16 +60,11 @@ h2 {
 /* --- Card Component (Layered Link Structure) --- */
 .card { 
     display: block; 
-    /* 【修正】border-radiusによる切り抜きを確実にする */
     border-radius: 4px; 
-    overflow: hidden; /* これが効いているか再確認 */
-    
+    overflow: hidden; 
     background: #fff; 
     transition: all 0.3s ease; 
     box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
-    
-    /* 【修正】透明なボーダーが隙間を生む可能性があるので、一旦削除または0にする */
-    /* border: 1px solid transparent;  <-- これを削除またはコメントアウト */
     border: none;
     position: relative;
 }
@@ -61,33 +80,32 @@ h2 {
     overflow: hidden; 
     background: #fff;
     position: relative;
-    /* 【追加】コンテナ自体の隙間をゼロにする */
     margin: 0;
     padding: 0;
     border: none;
 }
 
+/* カード内の画像は main img の影響を受けないよう、より詳細度を高く保つ */
 .card img { 
     width: 100%; 
     height: 100%; 
     object-fit: cover; 
     transition: transform 0.5s;
-    
-    /* 【修正】上端に強制的に合わせる */
     display: block;
-    /* 【追加】念には念を入れてマージンもゼロにする */
     margin: 0;
     padding: 0;
+    /* Article Bodyのスタイルを打ち消すため明示的に指定 */
+    max-height: none; 
+    box-shadow: none;
+    border-radius: 0;
 }
 
 .card:hover img { transform: scale(1.03); }
 
-/* 【重要】ここが欠落していました。余白の復活 */
 .content { 
     padding: 1.5rem; 
 }
 
-/* 【重要】日付とカテゴリを左右に分ける */
 .meta { 
     display: flex; 
     justify-content: space-between; 
@@ -98,14 +116,12 @@ h2 {
 .date { color: #999; }
 .category-label { color: #CD853F; text-transform: uppercase; letter-spacing: 0.05em; }
 
-/* Main Link (透明なシート) */
 .card h3 { margin: 0.5rem 0 1rem 0; font-size: 1.2rem; line-height: 1.4; }
 
 .main-link {
     color: #333;
     text-decoration: none;
 }
-/* 魔法: カード全体を覆うリンクエリア */
 .main-link::after {
     content: '';
     position: absolute;
@@ -116,7 +132,6 @@ h2 {
     z-index: 1; 
 }
 
-/* Concept Tags (個別クリック可能) */
 .tags { 
     display: flex; 
     gap: 0.5rem; 
@@ -128,7 +143,7 @@ h2 {
     color: #aaa; 
     transition: color 0.2s; 
     position: relative; 
-    z-index: 2; /* 透明シートより上に浮かせる */
+    z-index: 2; 
 }
 .tag:hover { color: #CD853F; }
 
@@ -145,7 +160,6 @@ h2 {
 }
 
 /* --- Post Footer (Share & Related) --- */
-
 .post-footer {
     margin-top: 5rem;
     padding-top: 3rem;
@@ -193,7 +207,6 @@ h2 {
 
 
 /* --- Footer Styles (The Void & The Signature) --- */
-
 .site-footer {
     margin-top: 8rem;
     padding: 4rem 0 4rem;
@@ -216,8 +229,7 @@ h2 {
     /* スマホ用の美しい幅設定は維持 */
     width: 90%; 
     
-    /* 【修正】下の余白(1.5rem)を削除し、純粋な中央揃え(0 auto)のみにする */
-    /* これにより、親要素の gap: 1.5rem だけが適用され、距離がぐっと縮まります */
+    /* 純粋な中央揃え(0 auto)のみ。親要素の gap: 1.5rem が適用される */
     margin: 0 auto; 
     
     text-align: left;
