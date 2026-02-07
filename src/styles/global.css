@@ -199,11 +199,13 @@ h2 {
 }
 /* src/styles/global.css の末尾を上書き */
 
-/* --- Footer Styles (Minimalist) --- */
+/* src/styles/global.css の末尾を上書き */
+
+/* --- Footer Styles (Centralized & Spacious) --- */
 
 .site-footer {
-    margin-top: 6rem;
-    padding: 4rem 0 3rem;
+    margin-top: 8rem; /* フッター自体の上の余白もたっぷりと */
+    padding: 4rem 0 4rem;
     border-top: 1px solid #E0Dbd0;
     text-align: center;
     font-family: var(--font-serif);
@@ -212,27 +214,31 @@ h2 {
 .footer-content {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    /* 各要素間の基本の余白 */
-    gap: 1.5rem;
+    align-items: center; /* 縦方向の軸を中央に */
+    
+    /* 【重要】要素間の余白を一括管理し、十分に広げる */
+    gap: 3rem; 
 }
 
 /* 1. Search Wrapper */
 .footer-search-wrapper {
     max-width: 400px;
     width: 100%;
-    /* 検索ボックスと下のSNSとの間を少し広めに取る */
-    margin: 0 auto 2rem auto;
-    text-align: left;
+    /* margin-bottom は gap に任せて削除 */
+    margin: 0 auto; 
+    text-align: left; /* 入力文字だけは左揃え */
 }
 
 /* 2. Socials */
 .footer-socials {
     display: flex;
-    gap: 1.5rem;
-    /* コピーライトとの間の余白 */
-    margin-bottom: 0.5rem;
+    gap: 2rem; /* アイコン同士の間隔も少し広めに */
+    
+    /* 【重要】内部のアイコンを強制的に中央揃えにする */
+    justify-content: center; 
+    width: 100%;
 }
+
 .footer-socials a {
     color: #999;
     transition: all 0.2s;
@@ -257,7 +263,7 @@ h2 {
 }
 
 
-/* --- Pagefind UI Overrides (Fixing Overlap) --- */
+/* --- Pagefind UI Overrides --- */
 :root {
     --pagefind-ui-scale: 0.85;
     --pagefind-ui-primary: #CD853F;
@@ -270,16 +276,14 @@ h2 {
     --pagefind-ui-font: "Times New Roman", "YuMincho", serif;
 }
 
-/* 検索入力欄の調整（被り修正） */
 .pagefind-ui__search-input {
     background-color: transparent !important;
     border-color: #E0Dbd0 !important;
     font-weight: normal !important;
     
-    /* 【重要】ここで左の余白を強制的に広げ、アイコンとの被りを防ぐ */
+    /* 虫眼鏡アイコンのための左余白 */
     padding-left: 2.8rem !important; 
     
-    /* 入力欄の高さと余白を少しリッチに */
     padding-top: 0.8rem !important;
     padding-bottom: 0.8rem !important;
 }
@@ -291,7 +295,7 @@ h2 {
 .pagefind-ui__result {
     border-color: #E0Dbd0 !important;
     padding: 1rem 0 !important;
-    text-align: left; /* 結果は左揃えで見やすく */
+    text-align: left;
 }
 .pagefind-ui__result-excerpt {
     font-size: 0.85rem !important;
