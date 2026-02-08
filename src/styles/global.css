@@ -172,16 +172,7 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
 /* -----------------------------------------------------------------
    4. Footer & Share
    ----------------------------------------------------------------- */
-.post-footer { margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #E0Dbd0; }
 
-.share-section { display: flex; align-items: center; gap: 1rem; margin-bottom: 4rem; justify-content: flex-end; font-family: sans-serif; font-size: 0.9rem; }
-.share-label { color: #999; font-style: italic; }
-.share-link { color: #333; text-decoration: none; border-bottom: 1px solid transparent; transition: all 0.2s; }
-.share-link:hover { color: #CD853F; border-bottom-color: #CD853F; }
-
-.related-section h3 { text-align: center; font-size: 1.2rem; margin-bottom: 2rem; color: #999; font-style: italic; letter-spacing: 0.1em; }
-.related-grid { gap: 1.5rem; }
-.related-grid .card-image { height: 150px; }
 
 .site-footer { margin-top: 8rem; padding: 4rem 0 4rem; border-top: 1px solid #E0Dbd0; text-align: center; font-family: var(--font-serif); }
 .footer-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
