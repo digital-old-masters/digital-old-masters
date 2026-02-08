@@ -1,5 +1,5 @@
 ---
-layout: ../../layouts/Layout.astro
+layout: ../../layouts/ArticleLayout.astro
 title: "Aoiro Sketch #001: Entropy of the Station"
 artDate: "2026-02-06"
 location: "Japan"

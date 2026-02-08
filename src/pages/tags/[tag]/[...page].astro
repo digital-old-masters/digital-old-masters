@@ -1,92 +1,140 @@
 ---
+/* src/pages/tags/[tag]/[...page].astro - Structure Optimized */
 import Layout from '../../../layouts/Layout.astro';
+import ArchiveSidebar from '../../../components/ArchiveSidebar.astro';
+import ArticleCarousel from '../../../components/ArticleCarousel.astro';
 import type { GetStaticPaths, Page } from 'astro';
 
 interface Props {
   page: Page<any>;
+  tagName: string;
+  heroPosts: any[]; /* Page 1のみ使用 */
 }
 
 export const getStaticPaths = (async ({ paginate }) => {
+  /* 1. 全記事データの取得 */
   const allPosts = Object.values(import.meta.glob('../../posts/*.{md,mdx}', { eager: true }));
+  
+  /* 2. ユニークなタグの抽出 */
   const uniqueTags = [...new Set(allPosts.flatMap((post: any) => post.frontmatter.tags || []))];
   
   return uniqueTags.flatMap((tag) => {
+    /* 3. タグでフィルタリング＆日付ソート */
     const filteredPosts = allPosts.filter((post: any) => 
       post.frontmatter.tags && post.frontmatter.tags.includes(tag)
     ).sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
     
-    return paginate(filteredPosts, {
+    /* 4. 「Pick Up (Hero)」用に最新5件を確保 */
+    const heroPosts = filteredPosts.slice(0, 5);
+    
+    /* 5. 「List」用には6件目以降を使用（重複回避） */
+    const listPosts = filteredPosts.slice(5);
+    
+    /* 6. ページネーション生成 */
+    return paginate(listPosts, {
       params: { tag: (tag as string) },
+      props: { tagName: tag, heroPosts },
       pageSize: 9
     });
   });
 }) satisfies GetStaticPaths;
 
-const { page } = Astro.props;
+const { page, tagName, heroPosts } = Astro.props;
 const { tag } = Astro.params;
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, ''); 
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const isFirstPage = page.currentPage === 1;
 
+/* ページネーション用URL生成関数 */
 const getPageUrl = (url: string | undefined) => {
     if (!url) return undefined;
     if (url.startsWith(baseUrl)) return url;
     return baseUrl + url;
 };
 
+/* パンくずリスト */
 const breadcrumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'Archives', href: '/archives' },
-    { label: `#${tag}`, href: `/tags/${tag}` }
+    { label: 'Home', href: `${baseUrl}/` },
+    { label: 'Archives', href: `${baseUrl}/archives` },
+    { label: `#${tagName}`, href: `${baseUrl}/tags/${tagName}` }
 ];
 ---
 
-<Layout title={`Tag: #${tag} (Page ${page.currentPage})`} description={`Articles tagged with #${tag}`} breadcrumbs={breadcrumbs}>
-    <section class="page-header" style="text-align:center; margin-bottom:3rem;">
-        <h1>#{tag}</h1>
-        <p class="subtitle">{page.total} pieces found.</p>
+<Layout title={`Tag: #${tagName}`} description={`Articles tagged with #${tagName}`} breadcrumbs={breadcrumbs}>
+    
+    {/* Page Header */}
+    <section class="page-header">
+        <h1>#{tagName}</h1>
+        {/* 全体の件数を表示（Hero含む） */}
+        <p class="subtitle">{page.total + (isFirstPage ? heroPosts.length : 5)} pieces found.</p>
     </section>
 
-    <section class="gallery">
-        <div class="grid">
-            {page.data.map((post: any) => (
-                <article class="card">
-                    <div class="card-image">
-                        {post.frontmatter.image && 
-                        <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
-                        }
-                    </div>
-                    <div class="content">
-                        <div class="meta">
-                            <span class="date">{post.frontmatter.artDate}</span>
-                            {post.frontmatter.category && <span class="category-label">{post.frontmatter.category}</span>}
-                        </div>
-                        <h3>
-                            <a href={post.url} class="main-link">
-                                {post.frontmatter.title}
-                            </a>
-                        </h3>
-                        <div class="tags">
-                            {post.frontmatter.tags && post.frontmatter.tags.map((t: string) => (
-                                <a href={`${baseUrl}/tags/${t}`} class="tag">#{t}</a>
-                            ))}
-                        </div>
-                    </div>
-                </article>
-            ))}
-        </div>
-    </section>
-
-    {/* ページネーションUIの追加 */}
-    {page.lastPage > 1 && (
-        <nav class="pagination">
-            {page.url.prev ? (
-                <a href={getPageUrl(page.url.prev)} class="prev">← Prev</a>
-            ) : <span class="disabled">← Prev</span>}
+    <div class="archive-container">
+        
+        {/* Main Column */}
+        <div class="archive-main">
             
-            <span class="current">Page {page.currentPage} of {page.lastPage}</span>
+            {/* Hero Section: 1ページ目かつ記事がある場合のみ表示 */}
+            {isFirstPage && heroPosts.length > 0 && (
+                <section class="hero-section">
+                     {/* 見出しを追加してサイドバーと高さを揃える */}
+                     <h2 class="section-label">Pick Up</h2>
+                     
+                     <div class="hero-carousel-wrapper">
+                        <ArticleCarousel posts={heroPosts} title="" />
+                     </div>
+                </section>
+            )}
 
-            {page.url.next ? (
-                <a href={getPageUrl(page.url.next)} class="next">Next →</a>
-            ) : <span class="disabled">Next →</span>}
-        </nav>
-    )}
+            {/* Main List Section */}
+            <section class="list-section">
+                {/* Heroがある場合のスペーサー */}
+                {isFirstPage && heroPosts.length > 0 && <div class="spacer-large" style="height: 4rem;"></div>}
+                
+                <h2 class="section-label">Article List</h2>
+
+                {page.data.length > 0 ? (
+                    <div class="compact-grid">
+                        {page.data.map((post: any) => (
+                            /* カテゴリーページと共通の Compact Card デザイン */
+                            <a href={post.url} class="compact-card">
+                                <div class="compact-image-wrapper">
+                                    {post.frontmatter.image && 
+                                        <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
+                                    }
+                                </div>
+                                <div class="compact-content">
+                                    <div class="compact-meta">
+                                        <span class="date">{post.frontmatter.artDate}</span>
+                                    </div>
+                                    <h3 class="compact-title">{post.frontmatter.title}</h3>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                ) : (
+                    /* リストが空の場合 */
+                    !isFirstPage && <p>No more articles.</p>
+                )}
+
+                {/* Pagination */}
+                {page.lastPage > 1 && (
+                    <nav class="pagination">
+                        {page.url.prev ? (
+                            <a href={getPageUrl(page.url.prev)} class="prev">← Prev</a>
+                        ) : <span class="disabled">← Prev</span>}
+                        
+                        <span class="current">Page {page.currentPage} of {page.lastPage}</span>
+
+                        {page.url.next ? (
+                            <a href={getPageUrl(page.url.next)} class="next">Next →</a>
+                        ) : <span class="disabled">Next →</span>}
+                    </nav>
+                )}
+            </section>
+        </div>
+
+        {/* Sidebar: 回遊性の確保 */}
+        <ArchiveSidebar />
+        
+    </div>
 </Layout>

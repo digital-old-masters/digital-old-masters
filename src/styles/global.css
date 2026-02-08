@@ -1,7 +1,8 @@
-/* src/styles/global.css - The Unified Style Logic */
+/* src/styles/global.css - The Unified Style Logic (Ver. 3.0: Cleaned) */
 
-/* --- 1. Root Variables & Reset (From Layout.astro) --- */
-/* ここがレイアウトの「魂」です。消してはいけなかった部分です。 */
+/* -----------------------------------------------------------------
+   1. Root Variables & Reset
+   ----------------------------------------------------------------- */
 :root {
     --c-bg: #F9F7F1;
     --c-text: #333333;
@@ -28,7 +29,6 @@ html {
 
 body { margin: 0; padding: 0; }
 
-/* 【守護神】レイアウト崩壊を防ぐ最重要設定 */
 main { 
     max-width: 800px; 
     margin: 0 auto; 
@@ -40,14 +40,16 @@ a { color: var(--c-accent); text-decoration: none; transition: opacity 0.2s; }
 a:hover { opacity: 0.8; }
 h1, h2, h3 { font-weight: normal; letter-spacing: 0.05em; }
 
-/* Breadcrumbs Styles */
+/* Breadcrumbs */
 .breadcrumbs { margin-bottom: 2rem; font-size: 0.85rem; color: #999; }
 .breadcrumbs ol { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; }
 .breadcrumbs li:not(:last-child)::after { content: "›"; margin: 0 0.5rem; color: #ccc; }
 .breadcrumbs a { color: #666; }
 .breadcrumbs span[aria-current="page"] { color: #333; }
 
-/* --- 2. Article & Base Elements --- */
+/* -----------------------------------------------------------------
+   2. Article & Base Elements
+   ----------------------------------------------------------------- */
 section { margin-bottom: 5rem; }
 .hero { text-align: center; padding: 4rem 0 3rem; }
 h1 { font-size: 2.8rem; margin-bottom: 0.5rem; letter-spacing: 0.08em; }
@@ -72,7 +74,7 @@ h2 {
     font-style: italic; 
 }
 
-/* Article Images */
+/* Base Images */
 main img {
     display: block;
     max-width: 100%;
@@ -98,7 +100,11 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
 .article-body { font-size: 1.05rem; text-align: justify; }
 .article-body p { margin-bottom: 1.5rem; }
 
-/* --- 3. Components (Grid, Cards, Pagination) --- */
+/* -----------------------------------------------------------------
+   3. Components (Generic Cards & Pagination)
+   ----------------------------------------------------------------- */
+/* ※ ArticleCarouselのスタイルは削除しました（carousel.cssへ移動済み） */
+
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -163,7 +169,9 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
 
 @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
 
-/* --- 4. Post Footer & Footer --- */
+/* -----------------------------------------------------------------
+   4. Footer & Share
+   ----------------------------------------------------------------- */
 .post-footer { margin-top: 5rem; padding-top: 3rem; border-top: 1px solid #E0Dbd0; }
 
 .share-section { display: flex; align-items: center; gap: 1rem; margin-bottom: 4rem; justify-content: flex-end; font-family: sans-serif; font-size: 0.9rem; }
@@ -178,7 +186,6 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
 .site-footer { margin-top: 8rem; padding: 4rem 0 4rem; border-top: 1px solid #E0Dbd0; text-align: center; font-family: var(--font-serif); }
 .footer-content { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
 .footer-search-wrapper { max-width: 400px; width: 90%; margin: 0 auto; text-align: left; }
-
 .footer-socials { display: flex; gap: 2rem; justify-content: center; width: 100%; }
 .footer-socials a { color: #999; transition: all 0.2s; display: flex; align-items: center; justify-content: center; padding: 0.5rem; border-radius: 50%; }
 .footer-socials a:hover { color: #CD853F; background: rgba(205, 133, 63, 0.1); transform: translateY(-2px); }
@@ -191,439 +198,157 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
 .pagefind-ui__result-excerpt { font-size: 0.85rem !important; color: #666 !important; }
 .pagefind-ui__credit { display: none !important; }
 
+/* -----------------------------------------------------------------
+   5. Archives & Category System
+   ----------------------------------------------------------------- */
 
-/* --- Article Carousel (Netflix Style - Peek-a-boo) --- */
-
-.carousel-section {
-    margin-bottom: 5rem;
-    /* 画面端まで広げるためのネガティブマージン */
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-    position: relative; /* Context for absolute positioning if needed */
+/* Container Physics */
+.archive-container {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 4rem;
+    width: 100%;
 }
 
-.carousel-section h2 {
-    /* タイトルはメインコンテンツのラインに合わせる */
-    padding-left: 1.5rem;
-    text-align: left;
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-    color: #999;
-    font-style: italic;
-    letter-spacing: 0.05em;
-}
-
-.carousel-container {
-    display: flex;
-    gap: 1rem; /* カード間の隙間 */
-    overflow-x: auto;
-    
-    /* 横方向への強制スナップ */
-    scroll-snap-type: x mandatory;
-    /* スナップした時に、左端に少し余白を持たせる */
-    scroll-padding-left: 1.5rem; 
-    
-    /* コンテナ自体のパディング（これで左端の余白を作る） */
-    padding: 0.5rem 1.5rem 2rem 1.5rem;
-    
-    /* スクロールバーを隠す */
-    scrollbar-width: none; /* Firefox */
-    -webkit-overflow-scrolling: touch; /* iOS inertial scroll */
-}
-.carousel-container::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
-
-.carousel-card {
-    /* 【重要】チラ見せの魔法 */
-    /* スマホ: 画面幅の80%を使うことで、右端に次のカードが必ず20%見切れる */
-    flex: 0 0 80vw;
-    
-    /* PCなど画面が広い場合の上限幅 */
-    max-width: 320px;
-    
-    /* スナップ位置: 左端合わせ */
-    scroll-snap-align: start;
-    
-    background: #fff;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease;
-    border: none;
-    
-    /* Flex itemとしての挙動安定化 */
-    flex-shrink: 0;
-}
-
-/* PC（画面幅768px以上）では固定幅に戻す */
-@media (min-width: 768px) {
-    .carousel-card {
-        flex: 0 0 280px; /* PCでの標準サイズ */
-    }
-}
-
-.carousel-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-}
-
-.carousel-link {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.carousel-image {
-    /* アスペクト比を固定（16:9 や 4:3 など、好みで調整可）*/
-    aspect-ratio: 16 / 9;
+/* メインカラムの封じ込め */
+.archive-main {
+    min-width: 0;
     width: 100%;
     overflow: hidden;
-    background: #f0f0f0;
-    position: relative;
-}
-.carousel-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    margin: 0;
-    max-height: none;
-    border-radius: 0;
-    box-shadow: none;
-    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.carousel-card:hover .carousel-image img {
-    transform: scale(1.08);
 }
 
-.carousel-content {
-    padding: 1.2rem;
-    flex-grow: 1; /* 高さを揃える */
-    display: flex;
-    flex-direction: column;
-}
-
-.carousel-date {
-    font-size: 0.75rem;
+/* Sidebar */
+.archive-section h2 {
+    font-size: 1.2rem;
     color: #999;
-    display: block;
-    margin-bottom: 0.5rem;
-    font-family: sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid #E0Dbd0;
+    padding-bottom: 0.8rem;
+    margin-bottom: 2rem;
 }
-
-.carousel-card h3 {
-    font-size: 1.1rem;
-    margin: 0 0 1rem 0;
-    line-height: 1.4;
-    color: #333;
-    font-weight: normal;
-}
-
-.carousel-tags {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: auto; /* タグを常に下部に配置 */
-}
-.carousel-tag {
-    font-size: 0.7rem;
-    color: #CD853F;
-    background: rgba(205, 133, 63, 0.08);
-    padding: 0.2rem 0.6rem;
-    border-radius: 100px; /* 丸みのあるタグ */
-}
-
-/* 右端の余白確保用 */
-.carousel-spacer {
-    flex: 0 0 1px;
-}
-
-
-/* --- Archives & Timeline System (Cinematic Grid) --- */
-
-/* 1. Page & Layout Structure */
-.page-header { 
-    text-align: center; 
-    margin-bottom: 4rem; 
-}
-.page-header h1 { 
-    font-size: 2.5rem; 
-    letter-spacing: 0.05em; 
-    margin-bottom: 0.5rem; 
-}
-/* .subtitle は既存の Base Styles を継承 */
-
-.archive-container { 
-    display: grid; 
-    grid-template-columns: 2fr 1fr; 
-    gap: 4rem; 
-}
-
-/* 2. Sidebar (Categories & Tags) */
-.archive-sidebar {
-    /* サイドバーのスタイル */
-}
-.archive-section h2 { 
-    font-size: 1.2rem; 
-    color: #999; 
-    text-transform: uppercase; 
-    letter-spacing: 0.1em; 
-    border-bottom: 1px solid #E0Dbd0; 
-    padding-bottom: 0.8rem; 
-    margin-bottom: 2rem; 
-}
-
 .category-list { list-style: none; padding: 0; }
 .category-list li { margin-bottom: 0.5rem; }
-.category-list a { 
-    font-size: 1rem; 
-    color: #555; 
-    display: block; 
-    padding: 0.2rem 0; 
-    border-bottom: 1px solid transparent; 
-    transition: all 0.2s; 
-}
-.category-list a:hover { 
-    color: #CD853F; 
-    padding-left: 0.5rem; 
-}
-
+.category-list a { font-size: 1rem; color: #555; display: block; padding: 0.2rem 0; border-bottom: 1px solid transparent; transition: all 0.2s; }
+.category-list a:hover { color: #CD853F; padding-left: 0.5rem; }
 .tag-cloud { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.tag-link { 
-    font-size: 0.85rem; 
-    color: #888; 
-    padding: 0.2rem 0.8rem; 
-    border: 1px solid #E0Dbd0; 
-    border-radius: 20px; 
-    transition: all 0.2s; 
-}
-.tag-link:hover { 
-    border-color: #CD853F; 
-    color: #CD853F; 
-    background: #fff; 
-}
+.tag-link { font-size: 0.85rem; color: #888; padding: 0.2rem 0.8rem; border: 1px solid #E0Dbd0; border-radius: 20px; transition: all 0.2s; }
+.tag-link:hover { border-color: #CD853F; color: #CD853F; background: #fff; }
 
-/* 3. Year Group & Header */
-.year-group { 
-    margin-bottom: 5rem; 
-}
-.year-meta-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: baseline; 
-    margin-bottom: 1.5rem; 
-    border-bottom: 1px solid #f0f0f0; 
-    padding-bottom: 0.5rem; 
-}
-.year-link { 
-    font-family: var(--font-serif); 
-    font-size: 1.8rem; 
-    color: #333; 
-    text-decoration: none; 
-}
+/* Timeline */
+.year-group { margin-bottom: 5rem; }
+.year-meta-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.5rem; }
+.year-link { font-family: var(--font-serif); font-size: 1.8rem; color: #333; text-decoration: none; }
 .year-link:hover { color: #CD853F; }
 .year-count { color: #999; font-size: 0.9rem; }
+.year-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; }
 
-/* 4. Cinematic Grid System */
-.year-grid {
-    display: grid;
-    /* レスポンシブ: 最小幅140pxで自動詰め込み */
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 0.5rem;
-}
+/* Preview Card (Cinematic) */
+.preview-card { position: relative; aspect-ratio: 1 / 1; overflow: hidden; border-radius: 2px; background: #e0e0e0; display: block; text-decoration: none; isolation: isolate; }
+.image-wrapper { width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.preview-card img { width: 100%; height: 100%; object-fit: cover; display: block; margin: 0; padding: 0; box-shadow: none; border-radius: 0; }
+.card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%); opacity: 0; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 1rem 0.8rem; z-index: 2; }
+.card-info { transform: translateY(10px); transition: transform 0.3s ease; }
+.card-date { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.8); font-family: sans-serif; margin-bottom: 0.2rem; }
+.card-title { font-size: 0.85rem; color: #fff; margin: 0; line-height: 1.3; font-weight: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-/* 5. Cinematic Preview Card (The Core Design) */
-.preview-card {
-    position: relative;
-    aspect-ratio: 1 / 1; /* 正方形を強制 */
-    overflow: hidden;
-    border-radius: 2px;
-    background: #e0e0e0;
-    display: block;
-    text-decoration: none;
-    isolation: isolate; /* 重なり順のコンテキスト生成 */
-}
-
-/* 画像ラッパー（ズーム用） */
-.image-wrapper {
-    width: 100%; 
-    height: 100%;
-    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); /* 高級感のあるイージング */
-}
-
-.preview-card img {
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover;
-    display: block; 
-    margin: 0; 
-    padding: 0; 
-    box-shadow: none; 
-    border-radius: 0;
-}
-
-/* オーバーレイ（黒グラデーション） */
-.card-overlay {
-    position: absolute; 
-    inset: 0; /* top, right, bottom, left: 0 と同義 */
-    /* 下から上へのグラデーション */
-    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%);
-    opacity: 0; /* PCではデフォルト非表示 */
-    transition: opacity 0.3s ease;
-    display: flex; 
-    flex-direction: column; 
-    justify-content: flex-end;
-    padding: 1rem 0.8rem;
-    z-index: 2;
-}
-
-.card-info {
-    transform: translateY(10px);
-    transition: transform 0.3s ease;
-}
-
-.card-date {
-    display: block; 
-    font-size: 0.7rem; 
-    color: rgba(255,255,255,0.8);
-    font-family: sans-serif; 
-    margin-bottom: 0.2rem;
-}
-
-.card-title {
-    font-size: 0.85rem; 
-    color: #fff; 
-    margin: 0;
-    line-height: 1.3; 
-    font-weight: normal;
-    /* 長いタイトルを2行で省略 (...) */
-    display: -webkit-box; 
-    -webkit-line-clamp: 2; 
-    -webkit-box-orient: vertical; 
-    overflow: hidden;
-}
-
-/* Interaction: PC (Mouse) */
 @media (hover: hover) {
-    .preview-card:hover .image-wrapper { 
-        transform: scale(1.08); /* ズームイン */
-    }
-    .preview-card:hover .card-overlay { 
-        opacity: 1; /* オーバーレイ表示 */
-    }
-    .preview-card:hover .card-info { 
-        transform: translateY(0); /* テキストがスッと上がる */
-    }
+    .preview-card:hover .image-wrapper { transform: scale(1.08); }
+    .preview-card:hover .card-overlay { opacity: 1; }
+    .preview-card:hover .card-info { transform: translateY(0); }
 }
-
-/* Interaction: Touch Device (Always Visible) */
 @media (hover: none) {
-    .card-overlay { 
-        opacity: 1; 
-        /* スマホ用は少し明るめのグラデーション */
-        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-    }
+    .card-overlay { opacity: 1; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); }
     .card-info { transform: translateY(0); }
     .card-title { font-size: 0.75rem; }
 }
-
-/* 6. "View All" Button (Card Style) */
-.more-link-card {
-    aspect-ratio: 1 / 1;
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    background: #fff; 
-    border: 1px dashed #ccc; 
-    color: #666;
-    text-decoration: none; 
-    transition: all 0.2s; 
-    border-radius: 2px;
-}
-.more-link-card:hover {
-    border-color: #CD853F; 
-    color: #CD853F; 
-    background: rgba(205, 133, 63, 0.05);
-}
+.more-link-card { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px dashed #ccc; color: #666; text-decoration: none; transition: all 0.2s; border-radius: 2px; }
+.more-link-card:hover { border-color: #CD853F; color: #CD853F; background: rgba(205, 133, 63, 0.05); }
 .more-content { text-align: center; }
 .more-label { display: block; font-size: 0.8rem; margin-bottom: 0.2rem; }
-.more-count { 
-    display: block; 
-    font-size: 1.4rem; 
-    font-weight: normal; 
-    font-family: var(--font-serif); 
+.more-count { display: block; font-size: 1.4rem; font-weight: normal; font-family: var(--font-serif); }
+
+/* --- Category Hub Elements --- */
+.category-shelves { margin-bottom: 6rem; border-top: 1px solid #E0Dbd0; padding-top: 4rem; }
+.shelf-group { margin-bottom: 5rem; }
+.shelf-group .carousel-section { margin-bottom: 1rem; }
+.shelf-footer { display: flex; justify-content: flex-end; padding-right: 1.5rem; margin-top: 0; }
+.show-all-link { font-family: var(--font-serif); font-size: 0.95rem; color: #999; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s ease; }
+.show-all-link:hover { color: #CD853F; }
+.show-all-link .arrow { display: inline-block; transition: transform 0.2s ease; }
+.show-all-link:hover .arrow { transform: translateX(4px); }
+
+/* -----------------------------------------------------------------
+   6. Compact Grid & Refined Layouts
+   ----------------------------------------------------------------- */
+
+/* Common Utilities */
+.section-label {
+    font-size: 1rem; color: #999; text-transform: uppercase; letter-spacing: 0.15em;
+    border-bottom: 1px solid #E0Dbd0; padding-bottom: 0.8rem; margin-bottom: 2rem;
+    text-align: center;
+}
+.spacer-large { height: 4rem; }
+
+/* Context-Aware Carousel Fix (アーカイブ内でのカルーセルの暴走阻止) */
+/* 【重要】これはコンポーネントスタイルではなく、レイアウトの調整なのでここに残します */
+.archive-main .carousel-section {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 3rem;
+}
+.archive-main .carousel-container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    scroll-padding-left: 0;
 }
 
-/* 7. Responsive Adjustments */
+/* Compact Grid */
+.compact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.compact-card {
+    display: flex; flex-direction: column; text-decoration: none; color: inherit;
+    border: none; background: transparent; transition: transform 0.2s ease;
+}
+.compact-card:hover { transform: translateY(-4px); }
+
+.compact-image-wrapper {
+    aspect-ratio: 3 / 2; width: 100%; overflow: hidden; border-radius: 2px;
+    background: #f0f0f0; margin-bottom: 1rem; position: relative; padding: 0;
+}
+.compact-image-wrapper img {
+    width: 100%; height: 100%; object-fit: cover; display: block; margin: 0; padding: 0;
+    max-width: none; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.compact-card:hover .compact-image-wrapper img { transform: scale(1.05); }
+
+.compact-content { }
+.compact-meta { font-size: 0.75rem; color: #999; margin-bottom: 0.4rem; font-family: sans-serif; }
+.compact-title { font-size: 1.05rem; line-height: 1.4; color: #333; margin: 0; font-weight: normal; }
+
+
+/* -----------------------------------------------------------------
+   7. Responsive Layouts
+   ----------------------------------------------------------------- */
 @media (max-width: 768px) {
-    .archive-container { 
-        grid-template-columns: 1fr; 
-        gap: 3rem; 
+    .archive-container {
+        grid-template-columns: 1fr;
+        display: block;
     }
-    .archive-sidebar { 
-        order: 2; /* スマホではサイドバーを下に */
-        margin-top: 3rem; 
-        padding-top: 3rem; 
-        border-top: 1px solid #E0Dbd0; 
-    }
-    .year-grid { 
-        /* スマホではグリッドを少し小さくして一覧性を高める */
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
-    }
-}
-
-/* --- Category Shelves & Hub Architecture --- */
-
-/* シェルフ全体のコンテナ（区切り線でセクションを明示） */
-.category-shelves {
-    margin-bottom: 6rem;
-    border-top: 1px solid #E0Dbd0; /* 区切り線 */
-    padding-top: 4rem;
-}
-
-/* 個別の棚グループ */
-.shelf-group {
-    margin-bottom: 5rem; /* 棚と棚の間の呼吸空間 */
-}
-
-/* カルーセルのマージン上書き */
-/* シェルフ内にあるカルーセルは、直下にリンクを置くため下の余白を詰める */
-.shelf-group .carousel-section {
-    margin-bottom: 1rem; 
-}
-
-/* Show All リンクの配置 */
-.shelf-footer {
-    display: flex;
-    justify-content: flex-end; /* 右寄せ */
-    padding-right: 1.5rem; /* カルーセルの右端余白とラインを合わせる */
-    margin-top: 0;
-}
-
-/* リンクのデザイン（控えめで上品に） */
-.show-all-link {
-    font-family: var(--font-serif);
-    font-size: 0.95rem;
-    color: #999;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: color 0.2s ease;
-}
-
-.show-all-link:hover {
-    color: #CD853F;
-}
-
-/* 矢印のアニメーション */
-.show-all-link .arrow {
-    display: inline-block;
-    transition: transform 0.2s ease;
-}
-
-.show-all-link:hover .arrow {
-    transform: translateX(4px); /* ホバー時に矢印が少し右に動く */
+    .archive-main { margin-bottom: 3rem; }
+    
+    .archive-sidebar { margin-top: 3rem; padding-top: 3rem; border-top: 1px solid #E0Dbd0; }
+    
+    .hero-section { margin-bottom: 3rem; }
+    .compact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    
+    .compact-card { margin-bottom: 1rem; }
+    .compact-image-wrapper { aspect-ratio: 16 / 9; }
+    .compact-title { font-size: 1.2rem; }
 }

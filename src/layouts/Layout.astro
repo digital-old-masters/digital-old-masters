@@ -19,19 +19,7 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 const currentUrl = Astro.url.href;
 const siteUrl = Astro.site ? Astro.site.toString() : "";
 
-/* --- ロジック③: 関連記事エンジン (MDX対応版) --- */
-let relatedPosts: any[] = [];
-if (frontmatter && frontmatter.tags) {
-    const allPosts = Object.values(import.meta.glob('../pages/posts/*.{md,mdx}', { eager: true }));
-    relatedPosts = allPosts
-        .filter((post: any) => 
-            post.url !== Astro.url.pathname && 
-            post.frontmatter.tags &&
-            post.frontmatter.tags.some((t: string) => frontmatter.tags.includes(t)) 
-        )
-        .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime())
-        .slice(0, 3); 
-}
+
 
 /* --- JSON-LD生成ロジック (SEO用) --- */
 /* 注: ここでは絶対パスが必要ですが、HTML表示には使いません */
@@ -141,44 +129,6 @@ const getBreadcrumbUrl = (url: string) => {
             )}
 
             <slot />
-
-            {frontmatter && (
-                <div class="post-footer">
-                    <div class="share-section">
-                        <span class="share-label">Share:</span>
-                        <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(currentUrl)}`} target="_blank" rel="noopener noreferrer" class="share-link">
-                            X (Twitter)
-                        </a>
-                    </div>
-
-                    {relatedPosts.length > 0 && (
-                        <div class="related-section">
-                            <h3>Related Works</h3>
-                            <div class="grid related-grid">
-                                {relatedPosts.map((post: any) => (
-                                    <article class="card">
-                                        <div class="card-image" style="height: 150px;">
-                                            {post.frontmatter.image && 
-                                            <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
-                                            }
-                                        </div>
-                                        <div class="content" style="padding: 1rem;">
-                                            <div class="meta">
-                                                <span class="date">{post.frontmatter.artDate}</span>
-                                            </div>
-                                            <h3 style="font-size: 1rem; margin: 0.5rem 0;">
-                                                <a href={post.url} class="main-link">
-                                                    {post.frontmatter.title}
-                                                </a>
-                                            </h3>
-                                        </div>
-                                    </article>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
         </main>
 
         <Footer />

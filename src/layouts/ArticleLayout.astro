@@ -1,0 +1,289 @@
+---
+/* src/layouts/ArticleLayout.astro - Specialized for Articles (Type-Safe Fix) */
+import Layout from './Layout.astro';
+import ArticleCarousel from '../components/ArticleCarousel.astro';
+
+/* Props定義: Markdownから渡される情報を型定義 */
+interface Props {
+  content: {
+    title: string;
+    description: string;
+    artDate: string;
+    image?: string;
+    tags?: string[];
+    category?: string;
+    location?: string;
+  };
+  headings: any[];
+}
+
+const { content } = Astro.props;
+/* 分割代入時にデフォルト値を与えるか、あるいはLayout側でオプショナルにする */
+const { title, description, artDate, image, tags, category, location } = content;
+
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentUrl = Astro.url.href;
+
+/* -----------------------------------------------------------------
+   Logic 1: パンくずリストの修正 (Fix 404)
+   ----------------------------------------------------------------- */
+const breadcrumbs = [
+    { label: 'Home', href: `${baseUrl}/` },
+    { label: 'Archives', href: `${baseUrl}/archives` },
+    ...(category ? [{ 
+        label: category, 
+        /* toLowerCase() でURL正規化 */
+        href: `${baseUrl}/category/${category.toLowerCase()}` 
+    }] : []),
+    { label: title, href: currentUrl }
+];
+
+/* -----------------------------------------------------------------
+   Logic 2: 関連記事の取得 (Carousel用)
+   ----------------------------------------------------------------- */
+let relatedPosts: any[] = [];
+if (tags) {
+    const allPosts = Object.values(import.meta.glob('../pages/posts/*.{md,mdx}', { eager: true }));
+    relatedPosts = allPosts
+        .filter((post: any) => 
+            post.url !== Astro.url.pathname && 
+            post.frontmatter.tags &&
+            post.frontmatter.tags.some((t: string) => tags.includes(t))
+        )
+        .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime())
+        .slice(0, 5);
+}
+---
+
+<Layout 
+    title={title} 
+    description={description} 
+    image={image} 
+    artDate={artDate} 
+    location={location}
+    breadcrumbs={breadcrumbs}
+    frontmatter={content}
+>
+    
+    {/* 記事本文 */}
+    <article class="article-content">
+        <slot />
+    </article>
+
+    {/* 記事フッターエリア */}
+    <div class="post-footer">
+        
+        {/* カテゴリとタグのナビゲーション */}
+        <div class="article-taxonomy">
+            {category && (
+                <div class="taxonomy-group">
+                    <span class="taxonomy-label">Category:</span>
+                    <a href={`${baseUrl}/category/${category.toLowerCase()}`} class="category-pill">
+                        {category}
+                    </a>
+                </div>
+            )}
+            
+            {tags && tags.length > 0 && (
+                <div class="taxonomy-group">
+                    <span class="taxonomy-label">Tags:</span>
+                    <div class="tag-list">
+                        {tags.map((tag) => (
+                            <a href={`${baseUrl}/tags/${tag}`} class="tag-pill">#{tag}</a>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+
+        {/* シェアボタン (Web Share API + Copy + X) */}
+        <div class="share-actions">
+            <span class="share-label">Share this work:</span>
+            <div class="share-buttons">
+                {/* 1. X (Twitter) */}
+                <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(currentUrl)}`} 
+                   target="_blank" rel="noopener noreferrer" class="share-btn is-twitter" aria-label="Share on X">
+                   X
+                </a>
+                
+                {/* 2. Copy Link */}
+                <button id="copyLinkBtn" class="share-btn is-copy" data-url={currentUrl} aria-label="Copy Link">
+                    Copy Link
+                </button>
+
+                {/* 3. Native Share */}
+                <button id="nativeShareBtn" class="share-btn is-native" data-title={title} data-url={currentUrl} aria-label="Share">
+                    Share
+                </button>
+            </div>
+            <span id="copyMessage" class="copy-feedback">Copied!</span>
+        </div>
+
+        {/* 関連記事カルーセル */}
+        {relatedPosts.length > 0 && (
+            <div class="related-section-carousel">
+                <h3 class="related-title">Related Works</h3>
+                <ArticleCarousel posts={relatedPosts} title="" />
+            </div>
+        )}
+    </div>
+</Layout>
+
+<script>
+    /* シェア機能のクライアントサイドロジック (Type Guard追加) */
+    const copyBtn = document.getElementById('copyLinkBtn');
+    const shareBtn = document.getElementById('nativeShareBtn');
+    const feedback = document.getElementById('copyMessage');
+
+    if (copyBtn && feedback) {
+        copyBtn.addEventListener('click', async () => {
+            const url = copyBtn.dataset.url;
+            /* 【修正】urlが存在するか確認してからコピー */
+            if (url) {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    feedback.classList.add('visible');
+                    setTimeout(() => feedback.classList.remove('visible'), 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            }
+        });
+    }
+
+    if (shareBtn) {
+        /* Web Share APIが使える場合のみボタンを表示 */
+        if (navigator.share) {
+            shareBtn.style.display = 'inline-flex';
+            shareBtn.addEventListener('click', () => {
+                const title = shareBtn.dataset.title || '';
+                const url = shareBtn.dataset.url || '';
+                
+                if (title && url) {
+                    navigator.share({ title, url }).catch(console.error);
+                }
+            });
+        } else {
+            shareBtn.style.display = 'none';
+        }
+    }
+</script>
+
+<style>
+    /* 記事フッター専用スタイル */
+    .post-footer {
+        margin-top: 6rem;
+        padding-top: 4rem;
+        border-top: 1px solid #E0Dbd0;
+    }
+
+    /* Taxonomy */
+    .article-taxonomy {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-bottom: 4rem;
+        align-items: center;
+    }
+    .taxonomy-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .taxonomy-label {
+        font-family: var(--font-serif);
+        font-style: italic;
+        color: #999;
+        font-size: 0.9rem;
+    }
+    .category-pill {
+        border: 1px solid #CD853F;
+        color: #CD853F;
+        padding: 0.4rem 1.2rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        letter-spacing: 0.05em;
+        text-decoration: none;
+    }
+    .category-pill:hover {
+        background: #CD853F;
+        color: #fff;
+    }
+    .tag-list {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+    .tag-pill {
+        background: rgba(205, 133, 63, 0.08);
+        color: #CD853F;
+        padding: 0.3rem 1rem;
+        border-radius: 100px;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .tag-pill:hover {
+        background: rgba(205, 133, 63, 0.2);
+    }
+
+    /* Share Buttons */
+    .share-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 5rem;
+    }
+    .share-label {
+        font-family: var(--font-serif);
+        font-style: italic;
+        color: #999;
+        font-size: 1rem;
+    }
+    .share-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+    .share-btn {
+        background: #fff;
+        border: 1px solid #E0Dbd0;
+        color: #333;
+        padding: 0.5rem 1.2rem;
+        border-radius: 2px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .share-btn:hover {
+        border-color: #CD853F;
+        color: #CD853F;
+    }
+    .copy-feedback {
+        font-size: 0.8rem;
+        color: #CD853F;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .copy-feedback.visible {
+        opacity: 1;
+    }
+
+    /* Related Works */
+    .related-section-carousel {
+        margin-top: 4rem;
+    }
+    .related-title {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #999;
+        font-style: italic;
+        margin-bottom: 2rem;
+        letter-spacing: 0.1em;
+    }
+</style>

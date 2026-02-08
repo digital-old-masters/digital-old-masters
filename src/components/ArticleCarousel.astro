@@ -1,5 +1,8 @@
 ---
-/* The Shelf: 最新の作品を陳列する横スクロールコンポーネント */
+/* src/components/ArticleCarousel.astro - Modularized & Structured */
+/* 1. 専用CSSのインポート */
+import '../styles/components/carousel.css';
+
 interface Props {
   posts: any[];
   title?: string;
@@ -14,26 +17,36 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   
   <div class="carousel-container">
     {posts.map((post) => (
+      /* 2. カード全体: articleタグ (position: relativeはCSSで適用済) */
       <article class="carousel-card">
-        <a href={post.url} class="carousel-link">
+           
+           {/* 画像エリア */}
            <div class="carousel-image">
               {post.frontmatter.image && 
                 <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
               }
            </div>
+
+           {/* コンテンツエリア */}
            <div class="carousel-content">
               <span class="carousel-date">{post.frontmatter.artDate}</span>
               <h3>{post.frontmatter.title}</h3>
+              
+              {/* 3. タグリンク (z-index: 2) */}
               <div class="carousel-tags">
                   {post.frontmatter.tags && post.frontmatter.tags.slice(0, 3).map((tag: string) => (
-                      <span class="carousel-tag">#{tag}</span>
+                      <a href={`${baseUrl}/tags/${tag}`} class="carousel-tag">
+                          #{tag}
+                      </a>
                   ))}
               </div>
            </div>
-        </a>
+
+           {/* 4. メイン記事リンク (Overlay, z-index: 1) */}
+           <a href={post.url} class="card-overlay-link" aria-label={`Read ${post.frontmatter.title}`}></a>
       </article>
     ))}
-    {/* 右端の余白用スペーサー */}
+    
     <div class="carousel-spacer"></div>
   </div>
 </section>
