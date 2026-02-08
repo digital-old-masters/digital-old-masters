@@ -573,3 +573,57 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
     }
 }
+
+/* --- Category Shelves & Hub Architecture --- */
+
+/* シェルフ全体のコンテナ（区切り線でセクションを明示） */
+.category-shelves {
+    margin-bottom: 6rem;
+    border-top: 1px solid #E0Dbd0; /* 区切り線 */
+    padding-top: 4rem;
+}
+
+/* 個別の棚グループ */
+.shelf-group {
+    margin-bottom: 5rem; /* 棚と棚の間の呼吸空間 */
+}
+
+/* カルーセルのマージン上書き */
+/* シェルフ内にあるカルーセルは、直下にリンクを置くため下の余白を詰める */
+.shelf-group .carousel-section {
+    margin-bottom: 1rem; 
+}
+
+/* Show All リンクの配置 */
+.shelf-footer {
+    display: flex;
+    justify-content: flex-end; /* 右寄せ */
+    padding-right: 1.5rem; /* カルーセルの右端余白とラインを合わせる */
+    margin-top: 0;
+}
+
+/* リンクのデザイン（控えめで上品に） */
+.show-all-link {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: #999;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s ease;
+}
+
+.show-all-link:hover {
+    color: #CD853F;
+}
+
+/* 矢印のアニメーション */
+.show-all-link .arrow {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.show-all-link:hover .arrow {
+    transform: translateX(4px); /* ホバー時に矢印が少し右に動く */
+}

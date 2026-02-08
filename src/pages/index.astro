@@ -1,0 +1,74 @@
+---
+/* src/pages/index.astro - The Category Hub (Evolution) */
+import Layout from '../layouts/Layout.astro';
+import LiteYouTube from '../components/LiteYouTube.astro';
+import ArticleCarousel from '../components/ArticleCarousel.astro';
+import '../styles/global.css';
+
+/* 1. データ取得: 全記事を一度に取得し、日付順にソート */
+const allPosts = Object.values(import.meta.glob('./posts/*.{md,mdx}', { eager: true }))
+    .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
+
+/* 2. データの加工 */
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+/* 最新のスケッチ（総合トップ用）: 最新10件を表示 */
+/* ここは「サイトの顔」なので、特定のカテゴリーに縛られず最新を見せます */
+const latestPosts = allPosts.slice(0, 10);
+
+/* カテゴリーリストの抽出（重複排除・アルファベット順） */
+const uniqueCategories = [...new Set(allPosts.map((post: any) => post.frontmatter.category).filter(Boolean))].sort();
+
+---
+
+<Layout title="Digital Old Masters" description="Archiving beauty into the semantic layer.">
+    
+    {/* Hero Section */}
+    <section class="hero">
+        <h1>Digital Old Masters</h1>
+        <p class="subtitle">Archiving beauty into the semantic layer.</p>
+    </section>
+
+    {/* Section 1: Latest Sketches (総合エントランス) */}
+    <ArticleCarousel posts={latestPosts} title="Latest Sketches →" />
+
+    {/* Section 2: Atelier (Video) */}
+    {/* コンテンツのリズムを変えるため、ここに動画を配置 */}
+    <section class="atelier">
+        <h2>Atelier</h2>
+        <LiteYouTube videoId="DYC-Vio6TlY" title="Drawing Process" />
+        <p class="caption">Process: Layer 1 to Layer 2</p>
+    </section>
+
+    {/* Section 3: Category Shelves (The Evolution) */}
+    {/* カテゴリーごとに動的に棚を生成し、ポータル化します */}
+    <div class="category-shelves">
+        {uniqueCategories.map((category: unknown) => {
+            const catName = category as string;
+            
+            /* そのカテゴリーの記事を抽出し、最新6件を取得 */
+            const catPosts = allPosts
+                .filter((post: any) => post.frontmatter.category === catName)
+                .slice(0, 6);
+            
+            /* 記事がないカテゴリーは表示しない（安全装置） */
+            if (catPosts.length === 0) return null;
+
+            return (
+                <div class="shelf-group">
+                    {/* カルーセル: タイトルに矢印を付与して誘導 */}
+                    <ArticleCarousel posts={catPosts} title={`${catName} →`} />
+                    
+                    {/* Show all リンク (構造的誘導) */}
+                    <div class="shelf-footer">
+                        <a href={`${baseUrl}/category/${catName.toLowerCase()}`} class="show-all-link">
+                            Show all {catName} <span class="arrow">→</span>
+                        </a>
+                    </div>
+                </div>
+            );
+        })}
+    </div>
+
+    {/* Footerへの接続: 自然な流れでフッターへ */}
+</Layout>
