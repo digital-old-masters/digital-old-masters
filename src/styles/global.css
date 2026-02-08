@@ -192,45 +192,55 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
 .pagefind-ui__credit { display: none !important; }
 
 
-/* --- Article Carousel (Netflix Style) --- */
+/* --- Article Carousel (Netflix Style - Peek-a-boo) --- */
 
 .carousel-section {
     margin-bottom: 5rem;
-    /* スマホで画面端まで広げるためのネガティブマージン */
+    /* 画面端まで広げるためのネガティブマージン */
     margin-left: -1.5rem;
     margin-right: -1.5rem;
+    position: relative; /* Context for absolute positioning if needed */
 }
 
 .carousel-section h2 {
-    /* タイトルはメインコンテンツの幅に合わせる */
+    /* タイトルはメインコンテンツのラインに合わせる */
     padding-left: 1.5rem;
     text-align: left;
     font-size: 1.1rem;
     margin-bottom: 1.5rem;
     color: #999;
     font-style: italic;
+    letter-spacing: 0.05em;
 }
 
 .carousel-container {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem; /* カード間の隙間 */
     overflow-x: auto;
-    /* 【重要】物理法則: 横方向への強制スナップ */
+    
+    /* 横方向への強制スナップ */
     scroll-snap-type: x mandatory;
+    /* スナップした時に、左端に少し余白を持たせる */
+    scroll-padding-left: 1.5rem; 
     
-    padding: 0.5rem 1.5rem 2rem 1.5rem; /* 下のパディングは影が見切れないように */
+    /* コンテナ自体のパディング（これで左端の余白を作る） */
+    padding: 0.5rem 1.5rem 2rem 1.5rem;
     
-    /* スクロールバーを隠す（機能は維持） */
+    /* スクロールバーを隠す */
     scrollbar-width: none; /* Firefox */
-    -webkit-overflow-scrolling: touch; /* iOS慣性スクロール */
+    -webkit-overflow-scrolling: touch; /* iOS inertial scroll */
 }
 .carousel-container::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
 
 .carousel-card {
-    /* カードの固定幅 */
-    flex: 0 0 280px;
+    /* 【重要】チラ見せの魔法 */
+    /* スマホ: 画面幅の80%を使うことで、右端に次のカードが必ず20%見切れる */
+    flex: 0 0 80vw;
     
-    /* 【重要】スナップ位置: カードの左端を画面に合わせる */
+    /* PCなど画面が広い場合の上限幅 */
+    max-width: 320px;
+    
+    /* スナップ位置: 左端合わせ */
     scroll-snap-align: start;
     
     background: #fff;
@@ -239,6 +249,16 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     transition: transform 0.3s ease;
     border: none;
+    
+    /* Flex itemとしての挙動安定化 */
+    flex-shrink: 0;
+}
+
+/* PC（画面幅768px以上）では固定幅に戻す */
+@media (min-width: 768px) {
+    .carousel-card {
+        flex: 0 0 280px; /* PCでの標準サイズ */
+    }
 }
 
 .carousel-card:hover {
@@ -251,58 +271,68 @@ article h1 { font-size: 2rem; margin-bottom: 0.5rem; text-align: center; }
     color: inherit;
     text-decoration: none;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .carousel-image {
-    height: 160px;
+    /* アスペクト比を固定（16:9 や 4:3 など、好みで調整可）*/
+    aspect-ratio: 16 / 9;
+    width: 100%;
     overflow: hidden;
     background: #f0f0f0;
+    position: relative;
 }
 .carousel-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    /* Globalのリセット */
     margin: 0;
     max-height: none;
     border-radius: 0;
     box-shadow: none;
-    transition: transform 0.5s;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .carousel-card:hover .carousel-image img {
-    transform: scale(1.05);
+    transform: scale(1.08);
 }
 
 .carousel-content {
-    padding: 1rem;
+    padding: 1.2rem;
+    flex-grow: 1; /* 高さを揃える */
+    display: flex;
+    flex-direction: column;
 }
 
 .carousel-date {
     font-size: 0.75rem;
     color: #999;
     display: block;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.5rem;
+    font-family: sans-serif;
 }
 
 .carousel-card h3 {
-    font-size: 1rem;
-    margin: 0 0 0.8rem 0;
+    font-size: 1.1rem;
+    margin: 0 0 1rem 0;
     line-height: 1.4;
     color: #333;
+    font-weight: normal;
 }
 
 .carousel-tags {
     display: flex;
-    gap: 0.4rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
+    margin-top: auto; /* タグを常に下部に配置 */
 }
 .carousel-tag {
     font-size: 0.7rem;
     color: #CD853F;
-    background: rgba(205, 133, 63, 0.1);
-    padding: 0.1rem 0.4rem;
-    border-radius: 2px;
+    background: rgba(205, 133, 63, 0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px; /* 丸みのあるタグ */
 }
 
 /* 右端の余白確保用 */
