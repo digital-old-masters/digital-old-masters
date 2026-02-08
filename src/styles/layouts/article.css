@@ -130,10 +130,3 @@
     margin-bottom: 1.5rem;
     letter-spacing: 0.1em;
 }
-
-/* 【重要】カルーセルコンポーネントの下部余白を強制上書き */
-/* article.css は ArticleLayoutで読み込まれるため、
-   ここでの指定により「記事ページ内でのみ」カルーセルの余白をゼロにします */
-.related-section-carousel :global(.carousel-section) {
-    margin-bottom: 0 !important; /* フッターとの距離過多を防ぐ */
-}
