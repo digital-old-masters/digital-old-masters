@@ -96,14 +96,19 @@ const breadcrumbs = [
 
                 {page.data.length > 0 ? (
                     <div class="compact-grid">
-                        {page.data.map((post: any) => (
-                            /* カテゴリーページと共通の Compact Card デザイン */
-                            <a href={post.url} class="compact-card">
-                                <div class="compact-image-wrapper">
-                                    {post.frontmatter.image && 
-                                        <img src={import.meta.env.BASE_URL + post.frontmatter.image} alt={post.frontmatter.title} loading="lazy" />
-                                    }
-                                </div>
+    {page.data.map((post: any, index: number) => ( /* index を追加 */
+        <a href={post.url} class="compact-card">
+            <div class="compact-image-wrapper">
+                {post.frontmatter.image && 
+                   /* 【修正】 1枚目だけ即時読み込み */
+                   <img 
+                       src={import.meta.env.BASE_URL + post.frontmatter.image} 
+                       alt={post.frontmatter.title} 
+                       loading={index === 0 ? "eager" : "lazy"}
+                       fetchpriority={index === 0 ? "high" : "auto"}
+                   />
+                }
+            </div>
                                 <div class="compact-content">
                                     <div class="compact-meta">
                                         <span class="date">{post.frontmatter.artDate}</span>
