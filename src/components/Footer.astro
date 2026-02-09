@@ -5,8 +5,15 @@ const today = new Date();
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
+<link 
+    href={`${basePath}/pagefind/pagefind-ui.css`} 
+    rel="stylesheet" 
+    media="print" 
+    onload="this.media='all'"
+>
+
 <link href={`${basePath}/pagefind/pagefind-ui.css`} rel="stylesheet">
-<script src={`${basePath}/pagefind/pagefind-ui.js`} is:inline></script>
+<script src={`${basePath}/pagefind/pagefind-ui.js`} is:inline async></script>
 
 <footer class="site-footer">
     <div class="footer-content">
@@ -29,17 +36,30 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 </footer>
 
 <script is:inline>
-  /* 【修正】View Transitions対応: ページ読み込みごとに実行 */
+  /* View Transitions対応: ページ読み込みごとに実行 */
   document.addEventListener('astro:page-load', () => {
-    /* 既に検索ボックスがある場合は初期化しない（重複防止） */
     const searchBox = document.querySelector("#search-box");
-    if (searchBox && searchBox.innerHTML === "") {
+    /* PagefindUIがまだロードされていない可能性を考慮し、存在チェックを行う */
+    if (searchBox && searchBox.innerHTML === "" && typeof PagefindUI !== 'undefined') {
         new PagefindUI({ 
             element: "#search-box", 
             showSubResults: true,
             showImages: false,
-            translations: { placeholder: "Search the archive..." }
+            translations: { placeholder: "Search..." }
         });
+    } else if (searchBox && searchBox.innerHTML === "") {
+        /* 非同期読み込みのタイミングズレ対策: ロード完了を監視 */
+        const checkLoaded = setInterval(() => {
+            if (typeof PagefindUI !== 'undefined') {
+                new PagefindUI({ 
+                    element: "#search-box", 
+                    showSubResults: true,
+                    showImages: false,
+                    translations: { placeholder: "Search..." }
+                });
+                clearInterval(checkLoaded);
+            }
+        }, 100);
     }
   });
 </script>
