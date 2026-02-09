@@ -1,0 +1,177 @@
+/* src/styles/components/card.css */
+/* Card & Grid Component Styles */
+
+/* -----------------------------------------------------------------
+   1. Standard Card (Vertical) - Used in [year].astro
+   ----------------------------------------------------------------- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 2.5rem;
+}
+
+.card { 
+    display: block; 
+    border-radius: 4px; 
+    overflow: hidden; 
+    background: #fff; 
+    transition: all 0.3s ease; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+    border: none;
+    position: relative;
+}
+.card:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08); 
+    border-color: #f0eadd; 
+}
+
+.card-image { 
+    height: 200px; 
+    overflow: hidden; 
+    background: #fff;
+    position: relative;
+    margin: 0; padding: 0; border: none;
+}
+
+.card img { 
+    width: 100%; height: 100%; object-fit: cover; 
+    transition: transform 0.5s; display: block; 
+    margin: 0; padding: 0; max-height: none; 
+    box-shadow: none; border-radius: 0;
+}
+.card:hover img { transform: scale(1.03); }
+
+.content { padding: 1.5rem; }
+
+.meta { 
+    display: flex; justify-content: space-between; 
+    align-items: center; margin-bottom: 0.5rem; font-size: 0.8rem; 
+}
+.date { color: #999; }
+.category-label { color: #CD853F; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.card h3 { margin: 0.5rem 0 1rem 0; font-size: 1.2rem; line-height: 1.4; }
+
+.main-link { color: #333; text-decoration: none; }
+.main-link::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+.tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+.tag { font-size: 0.75rem; color: #aaa; transition: color 0.2s; position: relative; z-index: 2; }
+.tag:hover { color: #CD853F; }
+
+
+/* -----------------------------------------------------------------
+   2. Cinematic Card (Square Overlay) - Used in index.astro
+   ----------------------------------------------------------------- */
+.year-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+    gap: 0.5rem; 
+}
+
+.preview-card { 
+    position: relative; 
+    aspect-ratio: 1 / 1; 
+    overflow: hidden; 
+    border-radius: 2px; 
+    background: #e0e0e0; 
+    display: block; 
+    text-decoration: none; 
+    isolation: isolate; 
+}
+
+.image-wrapper { 
+    width: 100%; height: 100%; 
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); 
+}
+.preview-card img { 
+    width: 100%; height: 100%; object-fit: cover; 
+    display: block; margin: 0; padding: 0; 
+    box-shadow: none; border-radius: 0; 
+}
+
+.card-overlay { 
+    position: absolute; inset: 0; 
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0) 100%); 
+    opacity: 0; transition: opacity 0.3s ease; 
+    display: flex; flex-direction: column; justify-content: flex-end; 
+    padding: 1rem 0.8rem; z-index: 2; 
+}
+.card-info { transform: translateY(10px); transition: transform 0.3s ease; }
+.card-date { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.8); font-family: sans-serif; margin-bottom: 0.2rem; }
+.card-title { font-size: 0.85rem; color: #fff; margin: 0; line-height: 1.3; font-weight: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+@media (hover: hover) {
+    .preview-card:hover .image-wrapper { transform: scale(1.08); }
+    .preview-card:hover .card-overlay { opacity: 1; }
+    .preview-card:hover .card-info { transform: translateY(0); }
+}
+@media (hover: none) {
+    .card-overlay { opacity: 1; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); }
+    .card-info { transform: translateY(0); }
+    .card-title { font-size: 0.75rem; }
+}
+
+.more-link-card { 
+    aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; 
+    background: #fff; border: 1px dashed #ccc; color: #666; 
+    text-decoration: none; transition: all 0.2s; border-radius: 2px; 
+}
+.more-link-card:hover { border-color: #CD853F; color: #CD853F; background: rgba(205, 133, 63, 0.05); }
+.more-content { text-align: center; }
+.more-label { display: block; font-size: 0.8rem; margin-bottom: 0.2rem; }
+.more-count { display: block; font-size: 1.4rem; font-weight: normal; font-family: var(--font-serif); }
+
+
+/* -----------------------------------------------------------------
+   3. Compact Card (List Style) - Used in [...page].astro
+   ----------------------------------------------------------------- */
+.compact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+.compact-card {
+    display: flex; flex-direction: column; text-decoration: none; color: inherit;
+    border: none; background: transparent; transition: transform 0.2s ease;
+}
+.compact-card:hover { transform: translateY(-4px); }
+
+.compact-image-wrapper {
+    aspect-ratio: 3 / 2; width: 100%; overflow: hidden; border-radius: 2px;
+    background: #f0f0f0; margin-bottom: 1rem; position: relative; padding: 0;
+}
+.compact-image-wrapper img {
+    width: 100%; height: 100%; object-fit: cover; display: block; margin: 0; padding: 0;
+    max-width: none; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.compact-card:hover .compact-image-wrapper img { transform: scale(1.05); }
+
+.compact-content { }
+.compact-meta { font-size: 0.75rem; color: #999; margin-bottom: 0.4rem; font-family: sans-serif; }
+.compact-title { font-size: 1.05rem; line-height: 1.4; color: #333; margin: 0; font-weight: normal; }
+
+
+/* -----------------------------------------------------------------
+   4. Pagination (Shared Utility)
+   ----------------------------------------------------------------- */
+.pagination { display: flex; justify-content: center; align-items: center; gap: 2rem; margin-top: 4rem; font-family: serif; }
+.pagination a, .pagination .disabled { padding: 0.5rem 1rem; border: 1px solid #E0Dbd0; border-radius: 2px; transition: all 0.2s; font-size: 0.9rem; }
+.pagination a:hover { border-color: #CD853F; color: #CD853F; }
+.pagination .disabled { opacity: 0.4; cursor: default; }
+.current { font-size: 0.9rem; color: #999; font-style: italic; }
+
+
+/* -----------------------------------------------------------------
+   5. Responsive Adjustments
+   ----------------------------------------------------------------- */
+@media (max-width: 768px) { 
+    .grid { grid-template-columns: 1fr; } 
+    .compact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .compact-card { margin-bottom: 1rem; }
+    .compact-image-wrapper { aspect-ratio: 16 / 9; }
+    .compact-title { font-size: 1.2rem; }
+}

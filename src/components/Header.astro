@@ -37,19 +37,32 @@ const navItems = [
 </header>
 
 <script>
-  const toggle = document.getElementById('menu-toggle');
-  const menu = document.getElementById('mobile-menu');
-  toggle?.addEventListener('click', () => {
-    menu?.classList.toggle('active');
-    toggle.classList.toggle('active');
-  });
-  // メニューリンクをクリックしたら閉じる
-  menu?.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        menu.classList.remove('active');
-        toggle.classList.remove('active');
-      });
-  });
+  /* 【修正】関数化してイベントリスナーに登録 */
+  function initMenu() {
+      const toggle = document.getElementById('menu-toggle');
+      const menu = document.getElementById('mobile-menu');
+      
+      /* イベントリスナーの重複登録を防ぐため、一度クローンしてリセットする手もあるが、
+         ここではシンプルに要素が存在する場合のみ設定 */
+      if(toggle && menu) {
+          /* 古いリスナーが残っている可能性を考慮し、クローンでリセット推奨だが、
+             今回は簡易的にクリックイベントを設定 */
+          toggle.onclick = () => {
+              menu.classList.toggle('active');
+              toggle.classList.toggle('active');
+          };
+
+          menu.querySelectorAll('a').forEach(link => {
+              link.onclick = () => {
+                  menu.classList.remove('active');
+                  toggle.classList.remove('active');
+              };
+          });
+      }
+  }
+
+  /* 初期読み込みと、遷移後の読み込み両方で実行 */
+  document.addEventListener('astro:page-load', initMenu);
 </script>
 
 <style>

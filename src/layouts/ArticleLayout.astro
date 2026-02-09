@@ -131,41 +131,42 @@ if (tags) {
 </Layout>
 
 <script>
-    /* シェア機能のクライアントサイドロジック (Type Guard追加) */
-    const copyBtn = document.getElementById('copyLinkBtn');
-    const shareBtn = document.getElementById('nativeShareBtn');
-    const feedback = document.getElementById('copyMessage');
+    function initShareButtons() {
+        const copyBtn = document.getElementById('copyLinkBtn');
+        const shareBtn = document.getElementById('nativeShareBtn');
+        const feedback = document.getElementById('copyMessage');
 
-    if (copyBtn && feedback) {
-        copyBtn.addEventListener('click', async () => {
-            const url = copyBtn.dataset.url;
-            /* 【修正】urlが存在するか確認してからコピー */
-            if (url) {
-                try {
-                    await navigator.clipboard.writeText(url);
-                    feedback.classList.add('visible');
-                    setTimeout(() => feedback.classList.remove('visible'), 2000);
-                } catch (err) {
-                    console.error('Failed to copy:', err);
+        if (copyBtn && feedback) {
+            /* onclickで上書きすればリスナー重複を防げる */
+            copyBtn.onclick = async () => {
+                const url = copyBtn.dataset.url;
+                if (url) {
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        feedback.classList.add('visible');
+                        setTimeout(() => feedback.classList.remove('visible'), 2000);
+                    } catch (err) {
+                        console.error('Failed to copy:', err);
+                    }
                 }
+            };
+        }
+
+        if (shareBtn) {
+            if (navigator.share) {
+                shareBtn.style.display = 'inline-flex';
+                shareBtn.onclick = () => {
+                    const title = shareBtn.dataset.title || '';
+                    const url = shareBtn.dataset.url || '';
+                    if (title && url) {
+                        navigator.share({ title, url }).catch(console.error);
+                    }
+                };
+            } else {
+                shareBtn.style.display = 'none';
             }
-        });
-    }
-
-    if (shareBtn) {
-        /* Web Share APIが使える場合のみボタンを表示 */
-        if (navigator.share) {
-            shareBtn.style.display = 'inline-flex';
-            shareBtn.addEventListener('click', () => {
-                const title = shareBtn.dataset.title || '';
-                const url = shareBtn.dataset.url || '';
-                
-                if (title && url) {
-                    navigator.share({ title, url }).catch(console.error);
-                }
-            });
-        } else {
-            shareBtn.style.display = 'none';
         }
     }
+
+    document.addEventListener('astro:page-load', initShareButtons);
 </script>

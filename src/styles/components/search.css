@@ -1,0 +1,27 @@
+/* src/styles/components/search.css */
+/* Pagefind UI Customization */
+
+.pagefind-ui__search-input { 
+    background-color: transparent !important; 
+    border-color: #E0Dbd0 !important; 
+    font-weight: normal !important; 
+    padding-left: 2.8rem !important; 
+    padding-top: 0.8rem !important; 
+    padding-bottom: 0.8rem !important; 
+}
+.pagefind-ui__search-input:focus { 
+    border-color: #CD853F !important; 
+    outline: none !important; 
+}
+.pagefind-ui__result { 
+    border-color: #E0Dbd0 !important; 
+    padding: 1rem 0 !important; 
+    text-align: left; 
+}
+.pagefind-ui__result-excerpt { 
+    font-size: 0.85rem !important; 
+    color: #666 !important; 
+}
+.pagefind-ui__credit { 
+    display: none !important; 
+}

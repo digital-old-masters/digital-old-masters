@@ -1,0 +1,77 @@
+/* src/styles/layouts/archive.css */
+/* Archive, Category, & Tag Page Layouts */
+
+/* --- Container Physics --- */
+.archive-container {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 4rem;
+    width: 100%;
+}
+
+.archive-main {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* --- Sidebar Elements --- */
+/* サイドバー内の見出し */
+.archive-section h2 {
+    font-size: 1.2rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid #E0Dbd0;
+    padding-bottom: 0.8rem;
+    margin-bottom: 2rem;
+}
+
+.category-list { list-style: none; padding: 0; }
+.category-list li { margin-bottom: 0.5rem; }
+.category-list a { font-size: 1rem; color: #555; display: block; padding: 0.2rem 0; border-bottom: 1px solid transparent; transition: all 0.2s; }
+.category-list a:hover { color: #CD853F; padding-left: 0.5rem; }
+
+.tag-cloud { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.tag-link { font-size: 0.85rem; color: #888; padding: 0.2rem 0.8rem; border: 1px solid #E0Dbd0; border-radius: 20px; transition: all 0.2s; }
+.tag-link:hover { border-color: #CD853F; color: #CD853F; background: #fff; }
+
+/* --- Timeline Layouts (Archives Index) --- */
+.year-group { margin-bottom: 5rem; }
+.year-meta-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.5rem; }
+.year-link { font-family: var(--font-serif); font-size: 1.8rem; color: #333; text-decoration: none; }
+.year-link:hover { color: #CD853F; }
+.year-count { color: #999; font-size: 0.9rem; }
+
+/* --- Category Hub Elements (Footer Shelves) --- */
+.category-shelves { margin-bottom: 6rem; border-top: 1px solid #E0Dbd0; padding-top: 4rem; }
+.shelf-group { margin-bottom: 5rem; }
+.shelf-group .carousel-section { margin-bottom: 1rem; }
+.shelf-footer { display: flex; justify-content: flex-end; padding-right: 1.5rem; margin-top: 0; }
+
+.show-all-link { font-family: var(--font-serif); font-size: 0.95rem; color: #999; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s ease; }
+.show-all-link:hover { color: #CD853F; }
+.show-all-link .arrow { display: inline-block; transition: transform 0.2s ease; }
+.show-all-link:hover .arrow { transform: translateX(4px); }
+
+/* --- Hero & Section Labels --- */
+.hero-section { margin-bottom: 5rem; }
+.section-label {
+    font-size: 1rem; color: #999; text-transform: uppercase; letter-spacing: 0.15em;
+    border-bottom: 1px solid #E0Dbd0; padding-bottom: 0.8rem; margin-bottom: 2rem;
+    text-align: center;
+}
+.spacer-large { height: 4rem; }
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+    .archive-container {
+        grid-template-columns: 1fr;
+        display: block;
+    }
+    .archive-main { margin-bottom: 3rem; }
+    
+    .archive-sidebar { margin-top: 3rem; padding-top: 3rem; border-top: 1px solid #E0Dbd0; }
+    
+    .hero-section { margin-bottom: 3rem; }
+}

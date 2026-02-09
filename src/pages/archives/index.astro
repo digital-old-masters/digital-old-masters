@@ -1,6 +1,8 @@
 ---
 /* src/pages/archives/index.astro */
 import Layout from '../../layouts/Layout.astro';
+import '../../styles/components/card.css';
+import '../../styles/layouts/archive.css';
 
 /* 全記事取得とソート */
 const allPosts = Object.values(import.meta.glob('../posts/*.{md,mdx}', { eager: true }))

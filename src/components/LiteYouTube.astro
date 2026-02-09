@@ -30,17 +30,21 @@ const posterUrl = backgroundImage
 </div>
 
 <script>
-    const containers = document.querySelectorAll('.video-container');
-    containers.forEach(c => {
-        c.addEventListener('click', () => {
-            const id = c.getAttribute('data-id');
-            const iframe = c.querySelector('iframe');
-            if (iframe && !iframe.src) {
-                iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-                c.classList.add('playing');
-            }
+    function initYouTube() {
+        const containers = document.querySelectorAll('.video-container');
+        containers.forEach(c => {
+            /* addEventListenerだと遷移のたびに増えるので、onclickプロパティを使用 */
+            (c as HTMLElement).onclick = () => {
+                const id = c.getAttribute('data-id');
+                const iframe = c.querySelector('iframe');
+                if (iframe && !iframe.src) {
+                    iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+                    c.classList.add('playing');
+                }
+            };
         });
-    });
+    }
+    document.addEventListener('astro:page-load', initYouTube);
 </script>
 
 <style>

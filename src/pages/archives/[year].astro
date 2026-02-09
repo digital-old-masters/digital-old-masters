@@ -1,6 +1,8 @@
 ---
 /* src/pages/archives/[year].astro */
 import Layout from '../../layouts/Layout.astro';
+import '../../styles/components/card.css';
+import '../../styles/layouts/archive.css';
 
 export async function getStaticPaths() {
   const allPosts = Object.values(import.meta.glob('../posts/*.{md,mdx}', { eager: true }));
