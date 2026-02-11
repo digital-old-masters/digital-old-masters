@@ -4,8 +4,10 @@ import Layout from '../../../layouts/Layout.astro';
 import ArchiveSidebar from '../../../components/ArchiveSidebar.astro';
 import ArticleCarousel from '../../../components/ArticleCarousel.astro';
 import type { GetStaticPaths, Page } from 'astro';
+import { getAllPosts } from '../../../lib/content';
 import '../../../styles/components/card.css';
 import '../../../styles/layouts/archive.css';
+import ArticleCard from '../../../components/ArticleCard.astro';
 
 interface Props {
   page: Page<any>;
@@ -14,7 +16,7 @@ interface Props {
 }
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const allPosts = Object.values(import.meta.glob('../../posts/*.{md,mdx}', { eager: true }));
+  const allPosts = getAllPosts();
   const uniqueCategories = [...new Set(allPosts.map((post: any) => post.frontmatter.category).filter(Boolean))];
   
   return uniqueCategories.flatMap((category) => {
@@ -93,25 +95,12 @@ const breadcrumbs = [
                 {page.data.length > 0 ? (
                     <div class="compact-grid">
     {page.data.map((post: any, index: number) => ( /* index を追加 */
-        <a href={post.url} class="compact-card">
-            <div class="compact-image-wrapper">
-                {post.frontmatter.image && 
-                    /* 【修正】リストの1枚目だけ即時読み込み */
-                    <img 
-                        src={import.meta.env.BASE_URL + post.frontmatter.image} 
-                        alt={post.frontmatter.title} 
-                        loading={index === 0 ? "eager" : "lazy"}
-                        fetchpriority={index === 0 ? "high" : "auto"}
-                    />
-                }
-            </div>
-                                <div class="compact-content">
-                                    <div class="compact-meta">
-                                        <span class="date">{post.frontmatter.artDate}</span>
-                                    </div>
-                                    <h3 class="compact-title">{post.frontmatter.title}</h3>
-                                </div>
-                            </a>
+        <ArticleCard 
+                                post={post} 
+                                variant="compact" 
+                                /* グリッドの上位3つ(1行目)は優先読み込み */
+                                loading={index < 3 ? "eager" : "lazy"} 
+                            />
                         ))}
                     </div>
                 ) : (

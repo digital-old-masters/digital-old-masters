@@ -1,14 +1,15 @@
 ---
-/* src/components/ArchiveSidebar.astro */
-/* アーカイブ、カテゴリー、タグページで共通使用するサイドバー */
-
-/* 全記事を取得してタグとカテゴリーを抽出 */
-/* 注: 相対パスはコンポーネントの位置(src/components)から見た src/pages/posts */
+/* src/components/ArchiveSidebar.astro - Modernized */
 import '../styles/layouts/archive.css';
-const allPosts = Object.values(import.meta.glob('../pages/posts/*.{md,mdx}', { eager: true }));
+/* 1. 浄水場への接続 */
+import { getAllPosts } from '../lib/content';
 
-const categories = [...new Set(allPosts.map((post: any) => post.frontmatter.category).filter(Boolean))].sort();
-const tags = [...new Set(allPosts.flatMap((post: any) => post.frontmatter.tags || []))].sort();
+/* 2. データの取得 (すでにソート済み・ID化済み) */
+const allPosts = getAllPosts();
+
+/* 3. 集計ロジック (変更なしだが、入力データが純水になった) */
+const categories = [...new Set(allPosts.map((post) => post.frontmatter.category).filter(Boolean))].sort();
+const tags = [...new Set(allPosts.flatMap((post) => post.frontmatter.tags || []))].sort();
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---

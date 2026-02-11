@@ -1,55 +1,59 @@
 ---
+/* src/components/Footer.astro - Config Powered */
+import { SITE_METADATA, SOCIAL_LINKS } from '../config';
 import '../styles/components/footer.css';
 import '../styles/components/search.css';
+
 const today = new Date();
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
+{/* CSSの読み込み（変更なし） */}
 <link 
     href={`${basePath}/pagefind/pagefind-ui.css`} 
     rel="stylesheet" 
     media="print" 
     onload="this.media='all'"
 >
-
-<link href={`${basePath}/pagefind/pagefind-ui.css`} rel="stylesheet">
 <script src={`${basePath}/pagefind/pagefind-ui.js`} is:inline async></script>
 
 <footer class="site-footer">
     <div class="footer-content">
         
+        {/* 検索ボックス（変更なし） */}
         <div class="footer-search-wrapper" id="search">
             <div id="search-box"></div>
-        </div> <div class="footer-socials">
-            <a href="https://twitter.com/your_twitter_id" target="_blank" rel="noopener" aria-label="Follow on X (Twitter)">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            <a href="https://www.youtube.com/@DigiOldMasters" target="_blank" rel="noopener" aria-label="Subscribe on YouTube">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-            </a>
         </div>
 
+        {/* SNSリンク: Configから生成 */}
+        <div class="footer-socials">
+            {SOCIAL_LINKS.map(link => (
+                <a href={link.href} target="_blank" rel="noopener" aria-label={`Follow on ${link.label}`}>
+                    {/* アイコン分岐ロジック */}
+                    {link.icon === 'twitter' && (
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    )}
+                    {link.icon === 'youtube' && (
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    )}
+                </a>
+            ))}
+        </div>
+
+        {/* コピーライト: Config連動 */}
         <small class="footer-copyright">
-            &copy; {today.getFullYear()} Digital Old Masters. All rights reserved.
+            &copy; {today.getFullYear()} {SITE_METADATA.title}. All rights reserved.
         </small>
     </div>
 </footer>
 
 <script is:inline>
-  /* View Transitions対応: ページ読み込みごとに実行 */
+  /* 検索初期化スクリプト（既存のロジックを維持） */
   document.addEventListener('astro:page-load', () => {
     const searchBox = document.querySelector("#search-box");
-    /* PagefindUIがまだロードされていない可能性を考慮し、存在チェックを行う */
-    if (searchBox && searchBox.innerHTML === "" && typeof PagefindUI !== 'undefined') {
-        new PagefindUI({ 
-            element: "#search-box", 
-            showSubResults: true,
-            showImages: false,
-            translations: { placeholder: "Search..." }
-        });
-    } else if (searchBox && searchBox.innerHTML === "") {
-        /* 非同期読み込みのタイミングズレ対策: ロード完了を監視 */
-        const checkLoaded = setInterval(() => {
+    if (searchBox && searchBox.innerHTML === "") {
+        /* UIのロード待ちを含む初期化ロジック */
+        const initPagefind = () => {
             if (typeof PagefindUI !== 'undefined') {
                 new PagefindUI({ 
                     element: "#search-box", 
@@ -57,9 +61,11 @@ const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
                     showImages: false,
                     translations: { placeholder: "Search..." }
                 });
-                clearInterval(checkLoaded);
+            } else {
+                setTimeout(initPagefind, 100);
             }
-        }, 100);
+        };
+        initPagefind();
     }
   });
 </script>

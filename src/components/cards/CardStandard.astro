@@ -1,0 +1,50 @@
+---
+/* src/components/cards/CardStandard.astro */
+import { getCloudinaryUrl } from '../../lib/cloudinary';
+import '../../styles/components/card.css';
+
+interface Props {
+  post: any;
+  loading?: "eager" | "lazy";
+}
+
+const { post, loading = "lazy" } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+/* 画像最適化: 標準カード用 (幅400px程度あれば十分) */
+const thumbnailId = post.frontmatter.image;
+const thumbnailUrl = thumbnailId 
+    ? getCloudinaryUrl(thumbnailId, { width: 400, height: 250 }) 
+    : '';
+---
+
+<article class="card">
+    <div class="card-image">
+        {thumbnailUrl && 
+            <img 
+                src={thumbnailUrl} 
+                alt={post.frontmatter.title} 
+                width="400"
+                height="250"
+                loading={loading}
+                fetchpriority={loading === "eager" ? "high" : "auto"}
+            />
+        }
+    </div>
+    <div class="content">
+        <div class="meta">
+            <span class="date">{post.frontmatter.artDate}</span>
+            {post.frontmatter.category && <span class="category-label">{post.frontmatter.category}</span>}
+        </div>
+        <h3>
+            <a href={`${baseUrl}${post.url}/`} class="main-link">
+                {post.frontmatter.title}
+            </a>
+        </h3>
+        <div class="tags">
+            {post.frontmatter.tags && post.frontmatter.tags.slice(0, 3).map((tag: string) => (
+                <a href={`${baseUrl}/tags/${tag}`} class="tag">#{tag}</a>
+            ))}
+        </div>
+    </div>
+</article>

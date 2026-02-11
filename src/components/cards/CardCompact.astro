@@ -1,0 +1,40 @@
+---
+/* src/components/cards/CardCompact.astro */
+import { getCloudinaryUrl } from '../../lib/cloudinary';
+import '../../styles/components/card.css';
+
+interface Props {
+  post: any;
+  loading?: "eager" | "lazy";
+}
+
+const { post, loading = "lazy" } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+/* 画像最適化: コンパクト用 */
+const thumbnailId = post.frontmatter.image;
+const thumbnailUrl = thumbnailId 
+    ? getCloudinaryUrl(thumbnailId, { width: 400, height: 250 }) 
+    : '';
+---
+
+<a href={`${baseUrl}${post.url}/`} class="compact-card">
+    <div class="compact-image-wrapper">
+        {thumbnailUrl && 
+            <img 
+                src={thumbnailUrl} 
+                alt={post.frontmatter.title} 
+                width="400"
+                height="250"
+                loading={loading}
+                fetchpriority={loading === "eager" ? "high" : "auto"}
+            />
+        }
+    </div>
+    <div class="compact-content">
+        <div class="compact-meta">
+            <span class="date">{post.frontmatter.artDate}</span>
+        </div>
+        <h3 class="compact-title">{post.frontmatter.title}</h3>
+    </div>
+</a>

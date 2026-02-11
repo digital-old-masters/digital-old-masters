@@ -1,23 +1,30 @@
 ---
+/* src/components/Header.astro - Config Powered */
+import { SITE_METADATA, NAV_ITEMS } from '../config';
+
+/* GitHub Pages用のベースパス処理 */
+/* import.meta.env.BASE_URL は '/digital-old-masters/' になります */
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
-const navItems = [
-  { href: '/', label: 'Home' },
-  // カテゴリリンクの例（必要に応じて増やしてください）
-  { href: '/category/sketches', label: 'Sketches' },
-  { href: '/category/essays', label: 'Essays' },
-  // アーカイブ（包摂案）
-  { href: '/archives', label: 'Archives' },
-  // 検索（アンカーリンク）
-  { href: '#search', label: '🔍', isIcon: true },
-];
+
+/* リンク生成ヘルパー: 内部リンクにはBaseUrlを付与、アンカー(#)や外部リンクはそのまま */
+const getPath = (href: string) => {
+  if (href.startsWith('#') || href.startsWith('http')) return href;
+  return baseUrl + href;
+};
 ---
+
 <header id="main-header">
   <div class="container">
-    <a href={import.meta.env.BASE_URL} class="logo">Digital Old Masters</a>
+    {/* タイトルをConfigから取得 (Brain) */}
+    <a href={import.meta.env.BASE_URL} class="logo">{SITE_METADATA.title}</a>
     
     <nav class="desktop-nav">
-      {navItems.map(item => (
-        <a href={item.href.startsWith('#') ? item.href : baseUrl + item.href} class={item.isIcon ? 'icon-link' : ''}>
+      {/* ナビゲーションをConfigから取得 (Brain) */}
+      {NAV_ITEMS.map(item => (
+        <a 
+            href={getPath(item.href)} 
+            class={item.isIcon ? 'icon-link' : ''}
+        >
           {item.label}
         </a>
       ))}
@@ -30,23 +37,18 @@ const navItems = [
   </div>
 
   <nav id="mobile-menu">
-    {navItems.map(item => (
-      <a href={item.href.startsWith('#') ? item.href : baseUrl + item.href}>{item.label}</a>
+    {NAV_ITEMS.map(item => (
+      <a href={getPath(item.href)}>{item.label}</a>
     ))}
   </nav>
 </header>
 
 <script>
-  /* 【修正】関数化してイベントリスナーに登録 */
   function initMenu() {
       const toggle = document.getElementById('menu-toggle');
       const menu = document.getElementById('mobile-menu');
       
-      /* イベントリスナーの重複登録を防ぐため、一度クローンしてリセットする手もあるが、
-         ここではシンプルに要素が存在する場合のみ設定 */
       if(toggle && menu) {
-          /* 古いリスナーが残っている可能性を考慮し、クローンでリセット推奨だが、
-             今回は簡易的にクリックイベントを設定 */
           toggle.onclick = () => {
               menu.classList.toggle('active');
               toggle.classList.toggle('active');
@@ -60,13 +62,12 @@ const navItems = [
           });
       }
   }
-
-  /* 初期読み込みと、遷移後の読み込み両方で実行 */
+  /* View Transitionsに対応するため、ページ遷移後も実行 */
   document.addEventListener('astro:page-load', initMenu);
 </script>
 
 <style>
-  /* ...以前のスタイルと同じ... */
+  /* デザイン（Skin）は変更なし */
   header { padding: 1.2rem 0; position: sticky; top: 0; background: var(--c-bg); z-index: 100; border-bottom: 1px solid transparent; transition: all 0.3s; }
   :global(body.scrolled) header { border-bottom-color: #E0Dbd0; background: rgba(249, 247, 241, 0.95); backdrop-filter: blur(5px); }
   .container { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; }

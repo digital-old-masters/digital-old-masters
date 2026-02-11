@@ -1,7 +1,9 @@
 ---
-/* src/components/ArticleCarousel.astro - Modularized & Structured */
+/* src/components/ArticleCarousel.astro - Cloudinary Optimized v1.2 */
 /* 1. 専用CSSのインポート */
 import '../styles/components/carousel.css';
+/* 2. 神経回路(Cloudinary)のインポート */
+import { getCloudinaryUrl } from '@/lib/cloudinary';
 
 interface Props {
   posts: any[];
@@ -16,18 +18,29 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   {title && <h2>{title}</h2>}
   
   <div class="carousel-container">
-    {posts.map((post, index) => ( /* index を追加 */
-      <article class="carousel-card">
+    {posts.map((post, index) => {
+      // 画像パスの取得
+      const imagePath = post.frontmatter.image;
+      
+      // Cloudinary URL生成 (CSSの 320px/16:9 に合わせた2倍解像度)
+      const optimizedImage = imagePath 
+        ? getCloudinaryUrl(imagePath, { width: 640, height: 360 }) 
+        : '';
+
+      return (
+        <article class="carousel-card">
            <div class="carousel-image">
-              {post.frontmatter.image && 
-                /* 【修正】1枚目(index === 0)だけ即時読み込み＆高優先度にする */
+              {optimizedImage && (
+                /* 【修正】LCP最適化ロジックは死守 */
                 <img 
-                  src={import.meta.env.BASE_URL + post.frontmatter.image} 
+                  src={optimizedImage} 
                   alt={post.frontmatter.title} 
+                  width="320"
+                  height="180"
                   loading={index === 0 ? "eager" : "lazy"}
                   fetchpriority={index === 0 ? "high" : "auto"}
                 />
-              }
+              )}
            </div>
 
            {/* コンテンツエリア */}
@@ -47,8 +60,9 @@ const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 
            {/* 4. メイン記事リンク (Overlay, z-index: 1) */}
            <a href={post.url} class="card-overlay-link" aria-label={`Read ${post.frontmatter.title}`}></a>
-      </article>
-    ))}
+        </article>
+      );
+    })}
     
     <div class="carousel-spacer"></div>
   </div>

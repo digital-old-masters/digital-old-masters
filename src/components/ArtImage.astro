@@ -1,0 +1,58 @@
+---
+/**
+ * ArtImage.astro - v1.0
+ * 機能: 画像の最適化配送、メタデータ保持制御、CLOUDINARY連携
+ * デザイン: @/styles/components/artimage.css に分離
+ */
+import '@/styles/components/artimage.css';
+import { getCloudinaryUrl } from '@/lib/cloudinary';
+
+interface Props {
+  src: string;        // 画像パス (例: /images/aoiro-001.jpg)
+  alt: string;        // 代替テキスト (必須)
+  width?: number;     // 実際の画像の幅 (アスペクト比計算用)
+  height?: number;    // 実際の画像の高さ
+  caption?: string;   // キャプション (任意)
+  
+  // Curator Mode Options
+  format?: string;    // 'webp', 'jpg', 'auto'
+  quality?: number;   // 80, 90, 100
+  keepMetadata?: boolean; // trueなら魂(IPTC)を守る
+}
+
+const {
+  src,
+  alt,
+  width = 800,
+  height = 600, // デフォルト値 (MDX側で指定推奨)
+  caption,
+  format = "webp", // デフォルトはWebP
+  quality = 80,    // デフォルトは80
+  keepMetadata = true // デフォルトは保持
+} = Astro.props;
+
+// Cloudinary URLの生成 (配送最適化)
+const imageUrl = getCloudinaryUrl(src, {
+  width,
+  height,
+  crop: 'limit', // 一枚絵なのでトリミングせず、枠に収める
+  format,
+  quality,
+  keepMetadata
+});
+
+// アスペクト比の計算 (CLS防止用のスタイル変数)
+const aspectRatio = `${width} / ${height}`;
+---
+
+<figure class="art-figure" style={`aspect-ratio: ${aspectRatio};`}>
+  <img 
+    src={imageUrl} 
+    alt={alt} 
+    width={width} 
+    height={height}
+    loading="lazy" 
+    decoding="async"
+  />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

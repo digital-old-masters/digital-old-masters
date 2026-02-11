@@ -1,0 +1,22 @@
+---
+/* src/components/ArticleCard.astro - The Dispatcher */
+import CardStandard from './cards/CardStandard.astro';
+import CardCompact from './cards/CardCompact.astro';
+import CardOverlay from './cards/CardOverlay.astro';
+
+interface Props {
+  post: any;
+  variant?: 'standard' | 'compact' | 'overlay';
+  loading?: "eager" | "lazy";
+}
+
+const { post, variant = 'standard', loading = "lazy" } = Astro.props;
+---
+
+{/* 条件分岐によるコンポーネントの出し分け */}
+
+{variant === 'standard' && <CardStandard post={post} loading={loading} />}
+
+{variant === 'compact' && <CardCompact post={post} loading={loading} />}
+
+{variant === 'overlay' && <CardOverlay post={post} loading={loading} />}

@@ -1,24 +1,37 @@
-# build output
+# --- Security: Secrets & Keys (絶対公開厳禁) ---
+.env
+.env.*
+client_secret.json
+token.pickle
+credentials.json
+
+# --- System & OS (Mac/Windowsのゴミファイル) ---
+.DS_Store
+Thumbs.db
+
+# --- Internal Tools & Scripts (運用ツールを除外) ---
+inject_metadata.py
+ship_to_world.py
+test-connection.js
+upload_vault.py
+
+# --- Node.js & Astro (依存ライブラリとビルド成果物) ---
+node_modules/
 dist/
-# generated types
 .astro/
 
-# dependencies
-node_modules/
+# --- Python: Cache & Build artifacts ---
+__pycache__/
+*.pyc
+venv/
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# --- Pipeline: Local Processed Images ---
+# 生データ(input)や処理結果(output/done)はGitに上げない
+images/input/*
+images/output/*
+images/done/*
 
-
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
-.DS_Store
-
-# jetbrains setting folder
-.idea/
+# ただし、フォルダ構造だけは維持するために .gitkeep は許可する
+!images/input/.gitkeep
+!images/output/.gitkeep
+!images/done/.gitkeep

@@ -1,0 +1,52 @@
+/* src/styles/components/artimage.css */
+/* ArtImage Component Styles */
+
+/* --- Figure (The Frame) --- */
+.art-figure {
+  margin: 2.5rem auto; /* 上下の余白を少し広めに */
+  width: 100%;
+  height: auto;
+  display: block;
+  position: relative;
+  
+  /* 画像が読み込まれる前でもスペースを確保し、ガタつき(CLS)を防ぐ */
+  /* aspect-ratio は Astro側から style 属性で上書きされます */
+  background-color: #f9f9f9; /* 読み込み中のプレースホルダー色 */
+  border-radius: 4px;
+}
+
+/* --- Image (The Canvas) --- */
+.art-figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 画像全体を切らずに表示 */
+  display: block;
+  border-radius: 4px;
+  
+  /* わずかに影を落として「物質感」を出す */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+  
+  /* フェードインなどのアニメーションが必要ならここに追加 */
+  transition: opacity 0.3s ease;
+}
+
+/* --- Caption (The Label) --- */
+.art-figure figcaption {
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  
+  /* キャプションらしい書体 */
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-style: italic;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* ダークモード対応 (将来用) */
+@media (prefers-color-scheme: dark) {
+  .art-figure { background-color: #222; }
+  .art-figure img { box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+  .art-figure figcaption { color: #aaa; }
+}

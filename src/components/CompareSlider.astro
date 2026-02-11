@@ -1,121 +1,72 @@
 ---
-/* src/components/CompareSlider.astro */
+/**
+ * CompareSlider.astro - v2.0 Curator's Edition
+ * 画質、フォーマット、メタデータ保持を手動制御可能に。
+ */
+import '@/styles/components/compare.css';
+import { getCloudinaryUrl } from '@/lib/cloudinary';
+
 interface Props {
   before: string;
   after: string;
   beforeLabel?: string;
   afterLabel?: string;
+  width?: number;
+  height?: number;
+  // 追加: 画質管理プロパティ
+  format?: string; 
+  quality?: number;
+  keepMetadata?: boolean;
 }
 
-const { before, after, beforeLabel = "Original", afterLabel = "Study" } = Astro.props;
+const { 
+  before, 
+  after, 
+  beforeLabel = "Original", 
+  afterLabel = "Study",
+  width = 800,
+  height = 600,
+  // デフォルト値
+  format = "webp",
+  quality = 80,
+  keepMetadata = true // デフォルトで「魂」を守る設定にします
+} = Astro.props;
 
-// 【修正】ベースURLを取得し、画像パスを自動補正するロジック
-const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
-
-// パスが '/' で始まり、かつ 'http' で始まらない場合、baseUrl を付与する関数
-const resolvePath = (path: string) => {
-  if (path.startsWith('/') && !path.startsWith('http')) {
-    return `${baseUrl}${path}`;
-  }
-  return path;
+// オプションをまとめる
+const options = { 
+  width, 
+  height, 
+  crop: 'fill', 
+  gravity: 'center',
+  format,
+  quality,
+  keepMetadata
 };
 
-const beforeSrc = resolvePath(before);
-const afterSrc = resolvePath(after);
+const beforeSrc = getCloudinaryUrl(before, options);
+const afterSrc = getCloudinaryUrl(after, options);
+
+const aspectRatio = `${width} / ${height}`;
 ---
 
-<div class="img-comp-container">
+<div class="img-comp-container" style={`aspect-ratio: ${aspectRatio};`}>
   <div class="img-comp-img img-comp-overlay">
-    <img src={beforeSrc} alt={beforeLabel} />
+    <img src={beforeSrc} alt={beforeLabel} loading="lazy" />
     <span class="label label-before">{beforeLabel}</span>
   </div>
+
   <div class="img-comp-img">
-    <img src={afterSrc} alt={afterLabel} />
+    <img src={afterSrc} alt={afterLabel} loading="lazy" />
     <span class="label label-after">{afterLabel}</span>
   </div>
+
   <div class="img-comp-slider">
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="#333"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
   </div>
 </div>
 
-<style>
-  .img-comp-container {
-    position: relative;
-    /* 【重要】高さの固定値を削除し、アスペクト比で確保する（レスポンシブ対応） */
-    /* ここでは一旦、一般的な4:3比率程度の高さを確保しつつ、画像ロード後にJSが調整することを期待 */
-    height: 400px; 
-    overflow: hidden;
-    margin: 3rem auto;
-    border-radius: 4px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    cursor: col-resize;
-    /* 選択防止 */
-    user-select: none;
-  }
-
-  .img-comp-img {
-    position: absolute;
-    width: auto;
-    height: 100%; /* 高さいっぱいに */
-    overflow: hidden;
-  }
-
-  .img-comp-img img {
-    display: block;
-    max-width: none !important; /* グローバルの制限を解除 */
-    height: 100%; 
-    object-fit: cover; /* 枠に合わせてトリミング */
-    margin: 0 !important; /* グローバルのマージンを除去 */
-  }
-
-  .img-comp-slider {
-    position: absolute;
-    z-index: 9;
-    cursor: col-resize;
-    top: 0;
-    left: 50%;
-    width: 40px;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(2px);
-    border-left: 1px solid rgba(255,255,255,0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: translateX(-50%);
-  }
-  
-  .img-comp-slider svg {
-    background: #fff;
-    border-radius: 50%;
-    padding: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  }
-  
-  .label {
-      position: absolute;
-      top: 1rem;
-      padding: 0.2rem 0.8rem;
-      background: rgba(0,0,0,0.6);
-      color: #fff;
-      font-size: 0.8rem;
-      border-radius: 20px;
-      pointer-events: none;
-      font-family: sans-serif;
-      white-space: nowrap; /* 折り返し防止 */
-      z-index: 10;
-  }
-  .label-before { left: 1rem; }
-  .label-after { right: 1rem; }
-
-  .img-comp-overlay {
-    z-index: 5;
-    width: 50%;
-    border-right: 1px solid rgba(255,255,255,0.5);
-  }
-</style>
-
 <script>
+  // Script部分は変更なし (v1.3のまま)
   function initComparisons() {
     const containers = document.getElementsByClassName("img-comp-container");
     for (let i = 0; i < containers.length; i++) {
@@ -123,50 +74,32 @@ const afterSrc = resolvePath(after);
     }
 
     function compareImages(container: HTMLElement) {
-      let slider: HTMLElement, img: HTMLElement, clicked: number = 0, w: number, h: number;
+      let slider = container.getElementsByClassName("img-comp-slider")[0] as HTMLElement;
+      let overlayDiv = container.getElementsByClassName("img-comp-overlay")[0] as HTMLElement;
+      let overlayImg = overlayDiv.querySelector('img') as HTMLImageElement;
       
-      // 画像がロードされたら高さを調整する処理
-      const images = container.getElementsByTagName("img");
-      if(images.length > 0) {
-          // 最初の画像（Original）を基準にする
-          const firstImg = images[0];
-          if (firstImg.complete) {
-              adjustHeight(firstImg);
-          } else {
-              firstImg.onload = () => adjustHeight(firstImg);
-          }
-      }
+      let clicked = 0;
+      let w = container.offsetWidth;
 
-      function adjustHeight(image: HTMLImageElement) {
-          // 画像のアスペクト比に基づいてコンテナの高さを調整
-          // 現在のコンテナ幅を取得
-          const currentWidth = container.offsetWidth;
-          const ratio = image.naturalHeight / image.naturalWidth;
-          if (ratio > 0) {
-            container.style.height = (currentWidth * ratio) + "px";
-          }
-      }
+      if (!slider || !overlayDiv || !overlayImg) return;
 
-      slider = container.getElementsByClassName("img-comp-slider")[0] as HTMLElement;
-      img = container.getElementsByClassName("img-comp-overlay")[0] as HTMLElement;
-
-      if (!slider || !img) return;
+      overlayImg.style.width = w + "px";
 
       slider.addEventListener("mousedown", slideReady);
       window.addEventListener("mouseup", slideFinish);
-      slider.addEventListener("touchstart", slideReady);
+      slider.addEventListener("touchstart", slideReady, {passive: false});
       window.addEventListener("touchend", slideFinish);
 
-      // 初期リサイズ時にも高さを再計算
-      window.addEventListener('resize', () => {
-          if(images.length > 0) adjustHeight(images[0]);
+      window.addEventListener('resize', () => { 
+        w = container.offsetWidth; 
+        overlayImg.style.width = w + "px";
       });
 
       function slideReady(e: MouseEvent | TouchEvent) {
         e.preventDefault();
         clicked = 1;
         window.addEventListener("mousemove", slideMove);
-        window.addEventListener("touchmove", slideMove);
+        window.addEventListener("touchmove", slideMove, {passive: false});
       }
 
       function slideFinish() {
@@ -177,7 +110,6 @@ const afterSrc = resolvePath(after);
 
       function slideMove(e: MouseEvent | TouchEvent) {
         if (clicked == 0) return false;
-        w = container.offsetWidth; // 動的に幅を再取得
         let pos = getCursorPos(e);
         if (pos < 0) pos = 0;
         if (pos > w) pos = w;
@@ -185,22 +117,17 @@ const afterSrc = resolvePath(after);
       }
 
       function getCursorPos(e: MouseEvent | TouchEvent) {
-        let a, x = 0;
         const pageX = (window.TouchEvent && e instanceof TouchEvent) ? e.changedTouches[0].pageX : (e as MouseEvent).pageX;
-        
-        a = container.getBoundingClientRect();
-        x = pageX - a.left;
-        x = x - window.pageXOffset;
-        return x;
+        const rect = container.getBoundingClientRect();
+        return pageX - rect.left - window.pageXOffset;
       }
 
       function slide(x: number) {
-        img.style.width = x + "px";
+        overlayDiv.style.width = x + "px";
         slider.style.left = x + "px";
       }
     }
   }
-  
   document.addEventListener('astro:page-load', initComparisons);
   initComparisons();
 </script>

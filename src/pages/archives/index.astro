@@ -1,12 +1,13 @@
 ---
 /* src/pages/archives/index.astro */
 import Layout from '../../layouts/Layout.astro';
+import { getAllPosts } from '../../lib/content';
 import '../../styles/components/card.css';
 import '../../styles/layouts/archive.css';
+import ArticleCard from '../../components/ArticleCard.astro';
 
 /* 全記事取得とソート */
-const allPosts = Object.values(import.meta.glob('../posts/*.{md,mdx}', { eager: true }))
-    .sort((a: any, b: any) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime());
+const allPosts = getAllPosts();
 
 /* 年ごとにグループ化 */
 const postsByYear = allPosts.reduce((acc: Record<string, any[]>, post: any) => {
@@ -61,27 +62,12 @@ const PREVIEW_LIMIT = 12;
                             
                             {/* グリッド表示 (Overlay Style) */}
                             <div class="year-grid">
-    {displayPosts.map((post: any, postIndex: number) => (
-        <a href={post.url} class="preview-card">
-            <div class="image-wrapper">
-                {post.frontmatter.image && 
-                    <img 
-                        src={import.meta.env.BASE_URL + post.frontmatter.image} 
-                        alt={post.frontmatter.title} 
-                        /* 【修正】 最初の4枚（PCで1列分＋予備、スマホで2列分）を即時読み込み */
-                        loading={(yearIndex === 0 && postIndex < 4) ? "eager" : "lazy"}
-                        fetchpriority={(yearIndex === 0 && postIndex < 4) ? "high" : "auto"}
-                    />
-                }
-            </div>
-                                        {/* オーバーレイ情報 (CSSで制御) */}
-                                        <div class="card-overlay">
-                                            <div class="card-info">
-                                                <span class="card-date">{post.frontmatter.artDate}</span>
-                                                <h4 class="card-title">{post.frontmatter.title}</h4>
-                                            </div>
-                                        </div>
-                                    </a>
+                                {displayPosts.map((post: any, postIndex: number) => (
+                                    <ArticleCard 
+                                        post={post} 
+                                        variant="overlay"
+                                        loading={(yearIndex === 0 && postIndex < 4) ? "eager" : "lazy"}
+                                    />
                                 ))}
                                 
                                 {/* もっと見るボタン (枠のみ) */}

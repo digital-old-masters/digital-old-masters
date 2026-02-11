@@ -1,0 +1,52 @@
+---
+/* src/components/cards/CardOverlay.astro */
+import { getCloudinaryUrl } from '../../lib/cloudinary';
+/* 注意: このスタイルは現在 inline または archive.css に依存しています。
+   必要に応じて card.css に .preview-card を移動することを推奨します。 */
+import '../../styles/layouts/archive.css'; 
+
+interface Props {
+  post: any;
+  loading?: "eager" | "lazy";
+}
+
+const { post } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+/* 画像最適化: 正方形クロップ (重要) */
+const thumbnailId = post.frontmatter.image;
+const thumbnailUrl = thumbnailId 
+    ? getCloudinaryUrl(thumbnailId, { width: 300, height: 300, crop: 'fill' }) // 正方形に切り抜き
+    : '';
+---
+
+<a href={`${baseUrl}${post.url}/`} class="preview-card" style={`background-image: url(${thumbnailUrl});`}>
+    <div class="preview-overlay">
+        <span class="preview-title">{post.frontmatter.title}</span>
+    </div>
+</a>
+
+<style>
+/* もしCSSが見つからない場合用の一時的なフォールバック */
+.preview-card {
+    display: block;
+    aspect-ratio: 1 / 1;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.preview-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: 1rem;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.preview-card:hover .preview-overlay {
+    opacity: 1;
+}
+</style>

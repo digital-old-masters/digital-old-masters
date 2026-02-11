@@ -1,10 +1,11 @@
 ---
-/* src/layouts/ArticleLayout.astro - Specialized for Articles (Type-Safe Fix) */
+/* src/layouts/ArticleLayout.astro - Phase 3: The Awakening (Fixed) */
 import Layout from './Layout.astro';
 import ArticleCarousel from '../components/ArticleCarousel.astro';
 import '../styles/layouts/article.css';
+/* lib/cloudinary.tsからメタデータ取得機能をインポート */
+import { getImageMetadata } from '../lib/cloudinary';
 
-/* Props定義: Markdownから渡される情報を型定義 */
 interface Props {
   content: {
     title: string;
@@ -19,28 +20,76 @@ interface Props {
 }
 
 const { content } = Astro.props;
-/* 分割代入時にデフォルト値を与えるか、あるいはLayout側でオプショナルにする */
 const { title, description, artDate, image, tags, category, location } = content;
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 const currentUrl = Astro.url.href;
+const siteUrl = Astro.site ? Astro.site.toString() : "https://digital-old-masters.com";
 
 /* -----------------------------------------------------------------
-   Logic 1: パンくずリストの修正 (Fix 404)
+   Logic 1: データ取得
+   ----------------------------------------------------------------- */
+/* 【修正】 null ではなく undefined (型定義付き) で初期化 */
+let richSchema: object | undefined; 
+
+if (image) {
+    /* 1. CloudinaryからExif/IPTCを取得 */
+    const imageEvidence = await getImageMetadata(image);
+    
+    /* 2. frontmatter + Exif/IPTC */
+    richSchema = {
+      "@context": "https://schema.org",
+      "@type": "VisualArtwork",
+      "name": title,
+      "description": description,
+      "url": currentUrl,
+      "image": {
+        "@type": "ImageObject",
+        "url": imageEvidence.url,
+        "width": imageEvidence.width,
+        "height": imageEvidence.height,
+        "description": imageEvidence.metadata.description || description,
+        "author": {
+            "@type": "Person",
+            "name": imageEvidence.metadata.artist || "Digital Old Masters"
+        },
+        "dateCreated": imageEvidence.metadata.dateCreated,
+        "contentLocation": {
+            "@type": "Place",
+            "name": location || "Japan"
+        }
+      },
+      "dateCreated": artDate,
+      "datePublished": artDate,
+      "artist": { 
+          "@type": "Person", 
+          "name": "Digital Old Masters",
+          /* 必要であればSNSリンクなどを追加 */
+          // "sameAs": "https://twitter.com/..." 
+      },
+      "artMedium": tags ? tags.join(', ') : "Oil on Canvas",
+      "copyrightHolder": {
+          "@type": "Person",
+          "name": imageEvidence.metadata.copyright || "Digital Old Masters"
+      }
+    };
+}
+
+/* -----------------------------------------------------------------
+   Logic 2: パンくずリスト
    ----------------------------------------------------------------- */
 const breadcrumbs = [
     { label: 'Home', href: `${baseUrl}/` },
     { label: 'Archives', href: `${baseUrl}/archives` },
     ...(category ? [{ 
         label: category, 
-        /* toLowerCase() でURL正規化 */
         href: `${baseUrl}/category/${category.toLowerCase()}` 
     }] : []),
     { label: title, href: currentUrl }
 ];
 
 /* -----------------------------------------------------------------
-   Logic 2: 関連記事の取得 (Carousel用)
+   Logic 3: 関連記事
    ----------------------------------------------------------------- */
 let relatedPosts: any[] = [];
 if (tags) {
@@ -64,17 +113,15 @@ if (tags) {
     location={location}
     breadcrumbs={breadcrumbs}
     frontmatter={content}
+    structuredData={richSchema} 
 >
-    
-    {/* 記事本文 */}
+    {/* Layoutに渡す際、richSchemaがundefinedならLayout側のデフォルトロジックが動く */}
+
     <article class="article-content">
         <slot />
     </article>
 
-    {/* 記事フッターエリア */}
     <div class="post-footer">
-        
-        {/* カテゴリとタグのナビゲーション */}
         <div class="article-taxonomy">
             {category && (
                 <div class="taxonomy-group">
@@ -97,22 +144,16 @@ if (tags) {
             )}
         </div>
 
-        {/* シェアボタン (Web Share API + Copy + X) */}
         <div class="share-actions">
             <span class="share-label">Share this work:</span>
             <div class="share-buttons">
-                {/* 1. X (Twitter) */}
                 <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(currentUrl)}`} 
                    target="_blank" rel="noopener noreferrer" class="share-btn is-twitter" aria-label="Share on X">
-                   X
+                    X
                 </a>
-                
-                {/* 2. Copy Link */}
                 <button id="copyLinkBtn" class="share-btn is-copy" data-url={currentUrl} aria-label="Copy Link">
-                    Copy Link
+                   Copy Link
                 </button>
-
-                {/* 3. Native Share */}
                 <button id="nativeShareBtn" class="share-btn is-native" data-title={title} data-url={currentUrl} aria-label="Share">
                     Share
                 </button>
@@ -120,7 +161,6 @@ if (tags) {
             <span id="copyMessage" class="copy-feedback">Copied!</span>
         </div>
 
-        {/* 関連記事カルーセル */}
         {relatedPosts.length > 0 && (
             <div class="related-section-carousel">
                 <h3 class="related-title">Related Works</h3>
@@ -137,7 +177,6 @@ if (tags) {
         const feedback = document.getElementById('copyMessage');
 
         if (copyBtn && feedback) {
-            /* onclickで上書きすればリスナー重複を防げる */
             copyBtn.onclick = async () => {
                 const url = copyBtn.dataset.url;
                 if (url) {
@@ -167,6 +206,5 @@ if (tags) {
             }
         }
     }
-
     document.addEventListener('astro:page-load', initShareButtons);
 </script>

@@ -1,15 +1,20 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-
 import mdx from '@astrojs/mdx';
+/* 【追加】Sitemapインテグレーション */
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  // あなたのGitHub URLのドメイン部分
+  // GitHub URLのドメイン部分
   site: 'https://digital-old-masters.github.io',
 
-  // あなたのリポジトリ名（サブディレクトリ）
+  // リポジトリ名（サブディレクトリ）
   base: '/digital-old-masters',
 
-  integrations: [mdx()],
+  integrations: [
+    mdx(),
+    /* ビルド時に sitemap-index.xml を生成 */
+    sitemap(),
+  ],
 });
