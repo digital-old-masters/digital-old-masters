@@ -1,10 +1,13 @@
 ---
-/* src/layouts/ArticleLayout.astro - Phase 3: The Awakening (Fixed) */
+/* src/layouts/ArticleLayout.astro - Phase 3.2: Hybrid Curator (TS Fixed) */
 import Layout from './Layout.astro';
 import ArticleCarousel from '../components/ArticleCarousel.astro';
 import '../styles/layouts/article.css';
-/* lib/cloudinary.tsからメタデータ取得機能をインポート */
+
+/* Logic Imports */
 import { getImageMetadata } from '../lib/cloudinary';
+import { CREATOR_IDENTITY, SITE_METADATA } from '../config';
+import { getToolById, getPlaceById } from '../lib/taxonomy';
 
 interface Props {
   content: {
@@ -14,70 +17,230 @@ interface Props {
     image?: string;
     tags?: string[];
     category?: string;
+    
+    /* Ver 0.3.1 New Fields */
+    art_type?: 'study' | 'anchor' | 'ref' | 'witness';
+    art_ref_url?: string;
+    tools?: string[];
     location?: string;
+    
+    /* 【修正】Gallery型定義を拡張し、外部URLと手動メタデータを許容 */
+    gallery?: { 
+        id?: string; 
+        url?: string; // 追加
+        credit?: string; // 追加
+        role: string; 
+        description?: string;
+        meta?: {      // 追加
+            dateCreated?: string;
+            lat?: number;
+            lng?: number;
+        };
+    }[];
+    
+    faq_content?: { q: string; a: string }[];
+    physical_dimensions?: { width: number; height: number; unit: 'cm' };
   };
   headings: any[];
 }
 
 const { content } = Astro.props;
-const { title, description, artDate, image, tags, category, location } = content;
+const { 
+  title, description, artDate, image, tags, category, 
+  art_type = 'study',
+  art_ref_url,
+  tools = [],
+  location = 'unknown',
+  gallery = [], 
+  faq_content,
+  physical_dimensions
+} = content;
 
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
 const currentUrl = Astro.url.href;
-const siteUrl = Astro.site ? Astro.site.toString() : "https://digital-old-masters.com";
+const siteUrl = Astro.site ? Astro.site.toString() : SITE_METADATA.siteUrl;
 
 /* -----------------------------------------------------------------
-   Logic 1: データ取得
+   Logic: Semantic Graph Construction
    ----------------------------------------------------------------- */
-/* 【修正】 null ではなく undefined (型定義付き) で初期化 */
-let richSchema: object | undefined; 
+
+let richSchema: object | undefined;
 
 if (image) {
-    /* 1. CloudinaryからExif/IPTCを取得 */
+    /* 1. メイン画像のメタデータ取得 */
     const imageEvidence = await getImageMetadata(image);
     
-    /* 2. frontmatter + Exif/IPTC */
-    richSchema = {
-      "@context": "https://schema.org",
-      "@type": "VisualArtwork",
-      "name": title,
-      "description": description,
-      "url": currentUrl,
-      "image": {
-        "@type": "ImageObject",
-        "url": imageEvidence.url,
-        "width": imageEvidence.width,
-        "height": imageEvidence.height,
-        "description": imageEvidence.metadata.description || description,
-        "author": {
-            "@type": "Person",
-            "name": imageEvidence.metadata.artist || "Digital Old Masters"
-        },
-        "dateCreated": imageEvidence.metadata.dateCreated,
-        "contentLocation": {
+    const identityId = `${siteUrl.replace(/\/$/, '')}/#identity`;
+    const artworkId = `${currentUrl}#artwork`;
+
+    /* 2. 画材ノード (Tools) */
+    const instrumentNodes = tools.map(toolId => {
+        const toolData = getToolById(toolId);
+        if (!toolData) return null;
+        return {
+            "@type": toolData.schemaType || "Product",
+            "name": toolData.name,
+            "brand": { "@type": "Brand", "name": toolData.brand },
+            "description": toolData.description,
+            "url": toolData.url
+        };
+    }).filter(Boolean);
+
+    /* 3. 場所ノード (Place) - プライバシーシールド発動 */
+    let locationNode = null;
+    const placeData = getPlaceById(location);
+
+    if (placeData) {
+        locationNode = {
             "@type": "Place",
-            "name": location || "Japan"
+            "name": placeData.name,
+            "geo": (placeData.public && placeData.geo) ? {
+                "@type": "GeoCoordinates",
+                "latitude": placeData.geo.latitude,
+                "longitude": placeData.geo.longitude
+            } : undefined
+        };
+    } else if (location !== 'atelier' && imageEvidence.metadata.gps) {
+        locationNode = {
+            "@type": "Place",
+            "name": "Recorded Location",
+            "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": imageEvidence.metadata.gps.latitude,
+                "longitude": imageEvidence.metadata.gps.longitude
+            }
+        };
+    }
+
+    /* 4. 星座モデル (Constellation) - Hybrid Logic */
+    let hasPartNodes: any[] = [];
+    let isBasedOnNodes: any[] = [];
+
+    // ギャラリー画像の処理 (Hybrid)
+    const galleryPromises = gallery.map(async (item) => {
+        // A. 内部画像 (Cloudinary ID)
+        if (item.id) {
+            const meta = await getImageMetadata(item.id);
+            return { 
+                url: meta.url,
+                title: meta.metadata.title,
+                description: meta.metadata.description || item.description,
+                date: meta.metadata.dateCreated,
+                gps: meta.metadata.gps,
+                role: item.role
+            };
+        } 
+        // B. 外部画像 (Remote URL)
+        else if (item.url) {
+            return {
+                url: item.url,
+                title: item.description || "Reference Image",
+                description: item.credit ? `Credit: ${item.credit}` : item.description,
+                date: item.meta?.dateCreated, // 手動データ
+                gps: (item.meta?.lat && item.meta?.lng) ? {
+                    latitude: item.meta.lat,
+                    longitude: item.meta.lng
+                } : undefined,
+                role: item.role
+            };
         }
-      },
-      "dateCreated": artDate,
-      "datePublished": artDate,
-      "artist": { 
-          "@type": "Person", 
-          "name": "Digital Old Masters",
-          /* 必要であればSNSリンクなどを追加 */
-          // "sameAs": "https://twitter.com/..." 
-      },
-      "artMedium": tags ? tags.join(', ') : "Oil on Canvas",
-      "copyrightHolder": {
-          "@type": "Person",
-          "name": imageEvidence.metadata.copyright || "Digital Old Masters"
-      }
+        return null;
+    });
+
+    // フィルタリング
+    const galleryData = (await Promise.all(galleryPromises)).filter((item): item is NonNullable<typeof item> => item !== null);
+
+    galleryData.forEach(item => {
+        const imgNode = {
+            "@type": item.role === 'reference' ? "VisualArtwork" : "ImageObject",
+            "name": item.title || "Related Image",
+            "description": item.description,
+            "contentUrl": item.url,
+            "dateCreated": item.date,
+            
+            "contentLocation": (item.role === 'reference' && item.gps) ? {
+                "@type": "Place",
+                "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": item.gps.latitude,
+                    "longitude": item.gps.longitude
+                }
+            } : undefined
+        };
+
+        if (item.role === 'reference') {
+            isBasedOnNodes.push(imgNode);
+        } else {
+            hasPartNodes.push(imgNode);
+        }
+    });
+    
+    if (art_ref_url && (art_type === 'study' || art_type === 'anchor')) {
+         isBasedOnNodes.push({ "@type": "VisualArtwork", "sameAs": art_ref_url });
+    }
+
+    /* 5. グラフ構築 */
+    const graphNodes: any[] = [
+        /* Node A: The Creator */
+        {
+            "@type": "Person",
+            "@id": identityId,
+            "name": CREATOR_IDENTITY.name,
+            "jobTitle": CREATOR_IDENTITY.jobTitle,
+            "image": CREATOR_IDENTITY.image,
+            "sameAs": CREATOR_IDENTITY.sameAs,
+            "knowsAbout": CREATOR_IDENTITY.knowsAbout
+        },
+        /* Node B: The Artwork */
+        {
+            "@type": "VisualArtwork",
+            "@id": artworkId,
+            "name": title,
+            "description": description,
+            "image": imageEvidence.url,
+            "dateCreated": artDate,
+            "creator": { "@id": identityId },
+            "copyrightHolder": { "@id": identityId },
+            "artMedium": tags ? tags.join(', ') : "Oil on Canvas",
+            "width": physical_dimensions ? `${physical_dimensions.width} ${physical_dimensions.unit}` : undefined,
+            "height": physical_dimensions ? `${physical_dimensions.height} ${physical_dimensions.unit}` : undefined,
+            
+            "instrument": instrumentNodes.length > 0 ? instrumentNodes : undefined,
+            "locationCreated": locationNode || undefined,
+            "hasPart": hasPartNodes.length > 0 ? hasPartNodes : undefined,
+            "isBasedOn": isBasedOnNodes.length > 0 ? isBasedOnNodes : undefined
+        },
+        /* Node C: The Article */
+        {
+            "@type": "Article",
+            "headline": title,
+            "author": { "@id": identityId },
+            "about": { "@id": artworkId },
+            "publisher": { "@id": identityId }
+        }
+    ];
+
+    if (faq_content && faq_content.length > 0) {
+        graphNodes.push({
+            "@type": "FAQPage",
+            "mainEntity": faq_content.map(item => ({
+                "@type": "Question",
+                "name": item.q,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": item.a,
+                    "author": { "@id": identityId }
+                }
+            }))
+        });
+    }
+
+    richSchema = {
+        "@context": "https://schema.org",
+        "@graph": graphNodes
     };
 }
 
-/* -----------------------------------------------------------------
-   Logic 2: パンくずリスト
-   ----------------------------------------------------------------- */
 const breadcrumbs = [
     { label: 'Home', href: `${baseUrl}/` },
     { label: 'Archives', href: `${baseUrl}/archives` },
@@ -88,9 +251,6 @@ const breadcrumbs = [
     { label: title, href: currentUrl }
 ];
 
-/* -----------------------------------------------------------------
-   Logic 3: 関連記事
-   ----------------------------------------------------------------- */
 let relatedPosts: any[] = [];
 if (tags) {
     const allPosts = Object.values(import.meta.glob('../pages/posts/*.{md,mdx}', { eager: true }));
@@ -115,8 +275,6 @@ if (tags) {
     frontmatter={content}
     structuredData={richSchema} 
 >
-    {/* Layoutに渡す際、richSchemaがundefinedならLayout側のデフォルトロジックが動く */}
-
     <article class="article-content">
         <slot />
     </article>
@@ -152,7 +310,7 @@ if (tags) {
                     X
                 </a>
                 <button id="copyLinkBtn" class="share-btn is-copy" data-url={currentUrl} aria-label="Copy Link">
-                   Copy Link
+                    Copy Link
                 </button>
                 <button id="nativeShareBtn" class="share-btn is-native" data-title={title} data-url={currentUrl} aria-label="Share">
                     Share

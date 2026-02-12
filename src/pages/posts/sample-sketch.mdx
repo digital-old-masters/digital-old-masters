@@ -1,13 +1,31 @@
 ---
 layout: ../../layouts/ArticleLayout.astro
-title: "Aoiro Sketch #001: Entropy of the Station"
-artDate: "2026-02-06"
-location: "Japan"
-description: "油彩における人の流れのエントロピーを観測し、線の強弱で表現した習作。"
-image: "2026-rembrandt-portrait-of-a-woman-study-blue-ipad"
-tags: ["aoiro", "Pencil", "Study"]
+title: "Hybrid Test: Blue Study & The Met"
+artDate: "2026-02-12"
+location: "atelier" # ★聖域設定 (GPS隠蔽)
+description: "外部参照プロトコルの動作テスト。アトリエ作品とThe Metのパブリックドメイン画像をリンク。"
+
+# --- Main Artwork (Internal / Sanctuary) ---
+image: "2026-rembrandt-portrait-of-a-woman-study-blue-ipad" # あなたのCloudinary ID
+tags: ["Test", "Rembrandt"]
 category: "Sketches"
+tools: ['ipad-pro']
+
+# --- The Constellation (External / Field) ---
+gallery:
+  - url: "https://collectionapi.metmuseum.org/api/collection/v1/iiif/437390/795782/main-image" # ★The Metの直リンク
+    role: "reference"
+    credit: "The Metropolitan Museum of Art"
+    description: "Portrait of a Woman (Rembrandt)"
+    meta:
+      dateCreated: "1660"
+      lat: 40.7794  # The Metの座標
+      lng: -73.9632
 ---
+
+
+
+
 import ArtImage from '../../components/ArtImage.astro';
 
 # Aoiro Sketch #001
@@ -27,5 +45,13 @@ AIは上の「---」で囲まれた部分（Frontmatter）を読み取り、JSON
   keepMetadata={true}
 />
 
-### 思考ログ
-今日は日差しが強く、影のコントラストが...
+### Reference
+この習作を描くにあたり、The Met が所蔵するレンブラントの正本を参照しました。
+
+<ArtImage 
+  src="https://collectionapi.metmuseum.org/api/collection/v1/iiif/437390/795782/main-image" 
+  alt="Portrait of a Woman by Rembrandt"
+  caption="Reference: Portrait of a Woman (Rembrandt) - The Met Collection"
+  width={1200} 
+  height={1600}
+/>

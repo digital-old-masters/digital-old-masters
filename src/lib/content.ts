@@ -1,63 +1,77 @@
 /**
  * src/lib/content.ts
- * "The Central Water Plant" (データ浄水場)
- * * 責務:
- * 1. 記事ファイル(.md/.mdx)の一括取得
- * 2. 日付順のソート (新しい順)
- * 3. 画像パスの正規化 (パス → ID変換)
+ * "The Central Water Plant" (Ver 0.3.1: Constellation Ready)
  */
 
-// 投稿データの型定義 (TypeScriptの恩恵)
 export interface Post {
   url: string;
   frontmatter: {
     title: string;
     artDate: string;
     description?: string;
-    image?: string;      // Cloudinary ID (例: aoiro-001)
+    image?: string;      // メイン作品のID
     tags?: string[];
     category?: string;
-    location?: string;
-    // Legacy support (移行期間用)
-    originalPath?: string; // 元のパス (例: /images/aoiro-001.jpg)
+
+    // --- Dimension 1: The Authority (Updated) ---
+    art_type?: 'study' | 'anchor' | 'ref' | 'witness';
+    tools?: string[];     // 画材ID (例: ['ipad-pro'])
+    location?: string;    // 場所ID (例: 'atelier', 'rijksmuseum')
+
+    // --- The Constellation Model (複数画像・役割分担) ---
+    gallery?: {
+      // A. 内部画像 (Cloudinary ID)
+      id?: string;
+      
+      // B. 外部画像 (Remote URL)
+      url?: string;
+      credit?: string; // 例: "The Met Collection"
+
+      // C. 共通
+      role: 'reference' | 'process' | 'detail' | 'witness';
+      description?: string;
+
+      // D. 手動メタデータ (外部画像用)
+      meta?: {
+        dateCreated?: string;
+        lat?: number;
+        lng?: number;
+      };
+    }[];
+
+    // --- Dimension 1.5: Dialogue ---
+    faq_content?: {
+        q: string;
+        a: string;
+    }[];
+
+    // --- Future Dimensions ---
+    physical_dimensions?: { width: number; height: number; unit: 'cm' };
+    process_video?: string;
   };
   file: string; // ファイルの絶対パス
 }
 
-// 全記事を取得・加工して返す関数
+// 全記事を取得・加工して返す関数 (既存ロジック維持)
 export function getAllPosts(): Post[] {
-  // 1. globで全記事を取得 (eager: true で即座に読み込む)
   const matches = import.meta.glob('../pages/posts/*.{md,mdx}', { eager: true });
-  
-  // 2. 配列に変換
   const posts = Object.values(matches) as any[];
 
-  // 3. ソートと加工 (The Filtration Process)
   return posts
-    .sort((a, b) => {
-      // 日付順 (新しい順)
-      return new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime();
-    })
+    .sort((a, b) => new Date(b.frontmatter.artDate).getTime() - new Date(a.frontmatter.artDate).getTime())
     .map((post) => {
       const rawImage = post.frontmatter.image || '';
       
-      // 画像パスからIDを抽出 (The ID Extraction)
-      // 例: "/images/aoiro-001.jpg" -> "aoiro-001"
-      // 例: "aoiro-001" -> "aoiro-001" (すでにIDの場合)
       const imageId = rawImage
-        .replace(/^\/?images\//, '') // 先頭の /images/ を削除
-        .replace(/^\/?public\//, '') // 万が一 public/ があっても削除
-        .replace(/\.[^/.]+$/, "");   // 拡張子(.jpgなど)を削除
+        .replace(/^\/?images\//, '')
+        .replace(/^\/?public\//, '')
+        .replace(/\.[^/.]+$/, "");
 
       return {
         ...post,
         frontmatter: {
           ...post.frontmatter,
-          // ここでデータを上書き！
-          // 今後、全てのコンポーネントは "image" を呼べば "ID" が返ってくる
           image: imageId,
-          
-          // 念のため元のパスも保存しておく (デバッグ用)
           originalPath: rawImage
         },
         url: post.url
@@ -65,18 +79,10 @@ export function getAllPosts(): Post[] {
     });
 }
 
-// 特定のタグを持つ記事だけを取得するヘルパー関数
 export function getPostsByTag(tag: string): Post[] {
-  return getAllPosts().filter(post => 
-    post.frontmatter.tags && post.frontmatter.tags.includes(tag)
-  );
+  return getAllPosts().filter(post => post.frontmatter.tags && post.frontmatter.tags.includes(tag));
 }
 
-// 特定のカテゴリーを持つ記事だけを取得するヘルパー関数
 export function getPostsByCategory(category: string): Post[] {
-  return getAllPosts().filter(post => 
-    post.frontmatter.category === category
-  );
+  return getAllPosts().filter(post => post.frontmatter.category === category);
 }
-
-console.log("✅ The Water Plant is running: Content pipeline established.");
