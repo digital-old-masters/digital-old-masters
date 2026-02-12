@@ -26,6 +26,12 @@ jobs:
         run: npm install
         
       - name: Build site (Astro + Pagefind)
+        # ここが修正ポイントです：Secretsを環境変数として注入します
+        env:
+          PUBLIC_CLOUDINARY_CLOUD_NAME: ${{ secrets.PUBLIC_CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+          PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
         run: npm run build
         
       - name: Upload artifact
