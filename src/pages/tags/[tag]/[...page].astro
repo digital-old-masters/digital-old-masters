@@ -17,7 +17,18 @@ interface Props {
 
 export const getStaticPaths = (async ({ paginate }) => {
   /* 1. 全記事データの取得 */
-  const allPosts = getAllPosts();
+  const rawPosts = getAllPosts();
+
+  /* ★追加: URLの補正処理 (Re-hydration) */
+  /* ここで直しておけば、HeroにもListにも正しいURLが渡ります */
+  const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const allPosts = rawPosts.map(post => {
+      let finalUrl = post.url;
+      if (!finalUrl.startsWith(baseUrl)) {
+          finalUrl = `${baseUrl}${post.url}`;
+      }
+      return { ...post, url: finalUrl };
+  });
   
   /* 2. ユニークなタグの抽出 */
   const uniqueTags = [...new Set(allPosts.flatMap((post: any) => post.frontmatter.tags || []))];
