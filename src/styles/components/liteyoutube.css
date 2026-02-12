@@ -1,0 +1,71 @@
+/* src/styles/components/liteyoutube.css */
+
+.video-wrapper {
+    max-width: 100%;
+    margin: 3rem auto; /* 記事内での余白を確保 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9; 
+    cursor: pointer;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-color: #000;
+    transition: opacity 0.3s;
+}
+
+/* ホバー時に少し暗くして、再生ボタンを目立たせる */
+.video-container:hover { 
+    opacity: 0.95;
+}
+
+.play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 64px;
+    height: 64px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    z-index: 2;
+    transition: all 0.2s ease-out;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.play-button svg { 
+    width: 32px; 
+    height: 32px; 
+    fill: currentColor;
+}
+
+.video-container:hover .play-button { 
+    background: rgba(205, 133, 63, 0.9); /* ブランドカラーに合わせる */
+    transform: translate(-50%, -50%) scale(1.1); 
+    border-color: transparent;
+}
+
+.youtube-iframe {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border: none; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 3;
+}
+
+.video-container.playing .youtube-iframe { 
+    opacity: 1; pointer-events: auto;
+}
+
+.video-container.playing .play-button { 
+    display: none; 
+}

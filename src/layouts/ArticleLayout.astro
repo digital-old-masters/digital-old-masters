@@ -1,5 +1,5 @@
 ---
-/* src/layouts/ArticleLayout.astro - Phase 3.2: Hybrid Curator (TS Fixed) */
+/* src/layouts/ArticleLayout.astro - Phase 4.2: Platinum ArtMedium Logic */
 import Layout from './Layout.astro';
 import ArticleCarousel from '../components/ArticleCarousel.astro';
 import '../styles/layouts/article.css';
@@ -18,26 +18,28 @@ interface Props {
     tags?: string[];
     category?: string;
     
-    /* Ver 0.3.1 New Fields */
+    /* Dimension 1 Fields */
     art_type?: 'study' | 'anchor' | 'ref' | 'witness';
     art_ref_url?: string;
     tools?: string[];
     location?: string;
     
-    /* 【修正】Gallery型定義を拡張し、外部URLと手動メタデータを許容 */
+    /* Dimension 2 Fields */
     gallery?: { 
         id?: string; 
-        url?: string; // 追加
-        credit?: string; // 追加
+        url?: string;
+        credit?: string;
         role: string; 
         description?: string;
-        meta?: {      // 追加
-            dateCreated?: string;
-            lat?: number;
-            lng?: number;
-        };
+        meta?: { dateCreated?: string; lat?: number; lng?: number; };
     }[];
     
+    /* Dimension 3 Fields */
+    youtube_id?: string;
+    video_title?: string;
+    video_tools?: string[];
+    emotions?: string[];
+
     faq_content?: { q: string; a: string }[];
     physical_dimensions?: { width: number; height: number; unit: 'cm' };
   };
@@ -52,6 +54,13 @@ const {
   tools = [],
   location = 'unknown',
   gallery = [], 
+  
+  // Dimension 3
+  youtube_id,
+  video_title,
+  video_tools = [],
+  emotions,
+  
   faq_content,
   physical_dimensions
 } = content;
@@ -67,26 +76,63 @@ const siteUrl = Astro.site ? Astro.site.toString() : SITE_METADATA.siteUrl;
 let richSchema: object | undefined;
 
 if (image) {
-    /* 1. メイン画像のメタデータ取得 */
     const imageEvidence = await getImageMetadata(image);
-    
     const identityId = `${siteUrl.replace(/\/$/, '')}/#identity`;
     const artworkId = `${currentUrl}#artwork`;
+    const videoId = youtube_id ? `${currentUrl}#video` : undefined;
 
-    /* 2. 画材ノード (Tools) */
+    /* ★ New Logic: Generate artMedium from Tools (The Platinum Strategy) */
+    // tools配列から mediumName を収集し、重複を排除して結合する
+    const mediumList = tools
+        .map(id => getToolById(id)?.mediumName) // 辞書からmediumNameを引く
+        .filter((name): name is string => !!name); // undefinedを除外
+
+    // 重複を削除 (例: 複数のデジタルツールがあっても "Digital Painting" は1つ)
+    const distinctMediums = [...new Set(mediumList)];
+    
+    // 結合 (もし画材指定がなければ、デフォルトとして "Oil on Canvas" 等を入れるか、空にする)
+    const artMediumValue = distinctMediums.length > 0 
+        ? distinctMediums.join(', ') 
+        : "Oil on Canvas"; // デフォルト値（必要に応じて変更可）
+
+
+    /* Dimension 3: Video Object */
+    let videoNode = null;
+    if (youtube_id) {
+        videoNode = {
+            "@type": "VideoObject",
+            "@id": videoId,
+            "name": video_title || `Process: ${title}`,
+            "description": `Drawing process for ${title}.`,
+            "uploadDate": artDate,
+            "thumbnailUrl": `https://img.youtube.com/vi/${youtube_id}/maxresdefault.jpg`,
+            "contentUrl": `https://www.youtube.com/watch?v=${youtube_id}`,
+            "embedUrl": `https://www.youtube.com/embed/${youtube_id}`,
+            "creator": { "@id": identityId }
+        };
+    }
+
+    /* 画材ノード (Precision Mode) */
     const instrumentNodes = tools.map(toolId => {
         const toolData = getToolById(toolId);
         if (!toolData) return null;
-        return {
+        
+        const toolNode: any = {
             "@type": toolData.schemaType || "Product",
             "name": toolData.name,
             "brand": { "@type": "Brand", "name": toolData.brand },
             "description": toolData.description,
             "url": toolData.url
         };
+
+        if (videoNode && video_tools.includes(toolId)) {
+            toolNode["subjectOf"] = { "@id": videoId };
+        }
+
+        return toolNode;
     }).filter(Boolean);
 
-    /* 3. 場所ノード (Place) - プライバシーシールド発動 */
+    /* 場所ノード */
     let locationNode = null;
     const placeData = getPlaceById(location);
 
@@ -112,13 +158,11 @@ if (image) {
         };
     }
 
-    /* 4. 星座モデル (Constellation) - Hybrid Logic */
+    /* 星座モデル */
     let hasPartNodes: any[] = [];
     let isBasedOnNodes: any[] = [];
 
-    // ギャラリー画像の処理 (Hybrid)
     const galleryPromises = gallery.map(async (item) => {
-        // A. 内部画像 (Cloudinary ID)
         if (item.id) {
             const meta = await getImageMetadata(item.id);
             return { 
@@ -129,14 +173,12 @@ if (image) {
                 gps: meta.metadata.gps,
                 role: item.role
             };
-        } 
-        // B. 外部画像 (Remote URL)
-        else if (item.url) {
+        } else if (item.url) {
             return {
                 url: item.url,
                 title: item.description || "Reference Image",
                 description: item.credit ? `Credit: ${item.credit}` : item.description,
-                date: item.meta?.dateCreated, // 手動データ
+                date: item.meta?.dateCreated,
                 gps: (item.meta?.lat && item.meta?.lng) ? {
                     latitude: item.meta.lat,
                     longitude: item.meta.lng
@@ -147,7 +189,6 @@ if (image) {
         return null;
     });
 
-    // フィルタリング
     const galleryData = (await Promise.all(galleryPromises)).filter((item): item is NonNullable<typeof item> => item !== null);
 
     galleryData.forEach(item => {
@@ -157,7 +198,6 @@ if (image) {
             "description": item.description,
             "contentUrl": item.url,
             "dateCreated": item.date,
-            
             "contentLocation": (item.role === 'reference' && item.gps) ? {
                 "@type": "Place",
                 "geo": {
@@ -179,7 +219,7 @@ if (image) {
          isBasedOnNodes.push({ "@type": "VisualArtwork", "sameAs": art_ref_url });
     }
 
-    /* 5. グラフ構築 */
+    /* グラフ構築 */
     const graphNodes: any[] = [
         /* Node A: The Creator */
         {
@@ -201,10 +241,14 @@ if (image) {
             "dateCreated": artDate,
             "creator": { "@id": identityId },
             "copyrightHolder": { "@id": identityId },
-            "artMedium": tags ? tags.join(', ') : "Oil on Canvas",
-            "width": physical_dimensions ? `${physical_dimensions.width} ${physical_dimensions.unit}` : undefined,
-            "height": physical_dimensions ? `${physical_dimensions.height} ${physical_dimensions.unit}` : undefined,
             
+            /* ★ Updated: artMedium from Tool Dictionary */
+            "artMedium": artMediumValue,
+
+            /* ★ Dimension 3: Emotional Metadata */
+            "keywords": emotions ? emotions.join(', ') : undefined,
+            
+            "subjectOf": videoNode ? { "@id": videoId } : undefined,
             "instrument": instrumentNodes.length > 0 ? instrumentNodes : undefined,
             "locationCreated": locationNode || undefined,
             "hasPart": hasPartNodes.length > 0 ? hasPartNodes : undefined,
@@ -219,6 +263,10 @@ if (image) {
             "publisher": { "@id": identityId }
         }
     ];
+
+    if (videoNode) {
+        graphNodes.push(videoNode);
+    }
 
     if (faq_content && faq_content.length > 0) {
         graphNodes.push({

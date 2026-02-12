@@ -2,16 +2,20 @@
 layout: ../../layouts/ArticleLayout.astro
 title: "Hybrid Test: Blue Study & The Met"
 artDate: "2026-02-12"
-location: "atelier" # ★聖域設定 (GPS隠蔽)
-description: "外部参照プロトコルの動作テスト。アトリエ作品とThe Metのパブリックドメイン画像をリンク。"
+location: "atelier" 
+description: "test"
+tags: ["Rembrandt"]
 
-# --- Main Artwork (Internal / Sanctuary) ---
+# --- Main Artwork ---
 image: "2026-rembrandt-portrait-of-a-woman-study-blue-ipad" # あなたのCloudinary ID
-tags: ["Test", "Rembrandt"]
 category: "Sketches"
-tools: ['ipad-pro']
+tools: ['ipad-pro', 'apple-pencil', 'pencil-sketch-book'] # 記事には鉛筆スケッチの話も出る
 
-# --- The Constellation (External / Field) ---
+# --- Youtube ---
+youtube_id: "c-R_bWV3LOw"
+video_tools: ['ipad-pro', 'apple-pencil'] # 動画にはiPadとペンしか映っていない
+
+# --- The Constellation (Pubric Domain) ---
 gallery:
   - url: "https://collectionapi.metmuseum.org/api/collection/v1/iiif/437390/795782/main-image" # ★The Metの直リンク
     role: "reference"
@@ -23,16 +27,21 @@ gallery:
       lng: -73.9632
 ---
 
-
-
-
+import LiteYouTube from '../../components/LiteYouTube.astro';
 import ArtImage from '../../components/ArtImage.astro';
 
 # Aoiro Sketch #001
 
-ここには、人間向けの解説を書きます。
-AIは上の「---」で囲まれた部分（Frontmatter）を読み取り、JSON-LDを構築します。
+## The Process
 
+この作品は、iPad Proを用いて描かれました。
+油彩 ('holbein-oil') の習作も兼ねていますが、この動画ではデジタル工程のみを収録しています。
+
+{/* 動画の埋め込み */}
+<LiteYouTube 
+  videoId="c-R_bWV3LOw" 
+  title="iPad Sketching Process" 
+/>
 
 <ArtImage 
   src="2026-rembrandt-portrait-of-a-woman-study-blue-ipad" 

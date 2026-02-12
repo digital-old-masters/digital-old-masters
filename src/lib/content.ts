@@ -1,6 +1,6 @@
 /**
  * src/lib/content.ts
- * "The Central Water Plant" (Ver 0.3.1: Constellation Ready)
+ * "The Central Water Plant" (Ver 0.4.1: Precision Targeting Fix)
  */
 
 export interface Post {
@@ -13,12 +13,12 @@ export interface Post {
     tags?: string[];
     category?: string;
 
-    // --- Dimension 1: The Authority (Updated) ---
+    // --- Dimension 1: The Authority ---
     art_type?: 'study' | 'anchor' | 'ref' | 'witness';
-    tools?: string[];     // 画材ID (例: ['ipad-pro'])
+    tools?: string[];     // 記事全体で言及するツール（全網羅）
     location?: string;    // 場所ID (例: 'atelier', 'rijksmuseum')
 
-    // --- The Constellation Model (複数画像・役割分担) ---
+    // --- Dimension 2: The Constellation ---
     gallery?: {
       // A. 内部画像 (Cloudinary ID)
       id?: string;
@@ -39,7 +39,15 @@ export interface Post {
       };
     }[];
 
-    // --- Dimension 1.5: Dialogue ---
+    // --- Dimension 3: The Experience ---
+    youtube_id?: string;       // YouTube動画ID
+    video_title?: string;      // 動画タイトル
+    
+    video_tools?: string[];    // ★追加: 動画に実際に映っているツールのみ指定 (Precision Targeting)
+    
+    emotions?: string[];       // 感情タグ
+
+    // --- Dialogue ---
     faq_content?: {
         q: string;
         a: string;
@@ -47,12 +55,12 @@ export interface Post {
 
     // --- Future Dimensions ---
     physical_dimensions?: { width: number; height: number; unit: 'cm' };
-    process_video?: string;
+    process_video?: string; // 旧フィールド（互換性のため残存）
   };
   file: string; // ファイルの絶対パス
 }
 
-// 全記事を取得・加工して返す関数 (既存ロジック維持)
+// 全記事を取得・加工して返す関数
 export function getAllPosts(): Post[] {
   const matches = import.meta.glob('../pages/posts/*.{md,mdx}', { eager: true });
   const posts = Object.values(matches) as any[];
